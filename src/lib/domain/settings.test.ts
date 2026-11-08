@@ -25,13 +25,15 @@ const dbDefault = {
 };
 
 describe("parseSettings", () => {
-  it("reads the database default exactly", () => {
-    expect(parseSettings(dbDefault)).toEqual(DEFAULT_SETTINGS);
+  it("reads the original database default (match K 32, no placing K → default placing K)", () => {
+    // 0001 predates the placing step: it stores eloK 32 and no eloPlaceK.
+    expect(parseSettings(dbDefault)).toEqual({ ...DEFAULT_SETTINGS, eloK: 32 });
   });
 
   it("fills missing or malformed fields with defaults", () => {
     const s = parseSettings({ eloK: "x", boards: 3, fmt: { ko: { start: 701 } }, points: [{ place: 1 }] });
-    expect(s.eloK).toBe(32);
+    expect(s.eloK).toBe(DEFAULT_SETTINGS.eloK);
+    expect(s.eloPlaceK).toBe(48);
     expect(s.boards).toBe(3);
     expect(s.fmt.ko).toEqual({ start: 701, bestOf: 5 });
     expect(s.fmt.group).toEqual({ start: 301, bestOf: 3 });
@@ -76,6 +78,9 @@ describe("validateSettings", () => {
 
   it("checks Elo and boards ranges", () => {
     expect(validateSettings({ ...ok(), eloK: 0 })).toEqual(["eloKInvalid"]);
+    expect(validateSettings({ ...ok(), eloPlaceK: 0 })).toEqual([]);
+    expect(validateSettings({ ...ok(), eloPlaceK: 201 })).toEqual(["eloPlaceKInvalid"]);
+    expect(validateSettings({ ...ok(), eloPlaceK: 4.5 })).toEqual(["eloPlaceKInvalid"]);
     expect(validateSettings({ ...ok(), eloStart: 50 })).toEqual(["eloStartInvalid"]);
     expect(validateSettings({ ...ok(), boards: 9 })).toEqual(["boardsInvalid"]);
     expect(validateSettings({ ...ok(), boards: 1 })).toEqual([]);

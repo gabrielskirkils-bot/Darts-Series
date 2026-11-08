@@ -219,9 +219,11 @@ export const copy = {
     },
     elo: {
       title: "Elo",
-      k: "K-factor",
+      k: "Match K-factor",
+      placeK: "Placing K-factor",
       start: "Start rating",
-      note: "Elo is recalculated from all matches when a tournament finishes.",
+      note:
+        "Each match moves Elo by up to the match K. When a tournament finishes, every player also 'plays' everyone else by final place (better place wins, shared place draws), worth the placing K in total, so going further always counts. Elo is recalculated from all tournaments whenever one finishes; use “Recalculate results” on a tournament after changing these.",
     },
     formats: {
       title: "Default match formats",
@@ -239,6 +241,7 @@ export const copy = {
       placeDuplicate: "Each place can only appear once.",
       ptsInvalid: "Points must be whole numbers from 0.",
       eloKInvalid: "K-factor must be a whole number from 1 to 100.",
+      eloPlaceKInvalid: "Placing K-factor must be a whole number from 0 to 200.",
       eloStartInvalid: "Start rating must be a whole number from 100 to 3000.",
       boardsInvalid: "Boards must be 1–8.",
       formatInvalid: "Pick a valid start score and best-of for each stage.",

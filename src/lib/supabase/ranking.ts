@@ -1,5 +1,5 @@
 import "server-only";
-import { computeElo, type EloMatch, type EloSettings } from "@/lib/domain/elo";
+import { computeElo, type EloMatch, type EloPlacement, type EloSettings } from "@/lib/domain/elo";
 import type { ResultEntry } from "@/lib/domain/points";
 import type {
   EloRow,
@@ -20,26 +20,40 @@ type Db = Awaited<ReturnType<typeof createClient>>;
 // ---------------------------------------------------------------
 
 /**
- * The full Elo history as JSON for `save_results` / `delete_tournament`.
- * `include` counts a tournament that is being finished; `exclude` drops one being deleted.
+ * The full Elo history as JSON for `save_results` / `delete_tournament`: every finished
+ * match plus each tournament's placing step (from its frozen results).
+ * `include` counts a tournament that is being finished or recalculated, with the places just
+ * computed; `exclude` drops one being deleted.
  */
 export async function eloPayload(
   db: Db,
   settings: EloSettings,
-  opts: { include?: string; exclude?: string } = {},
+  opts: { include?: { id: string; results: readonly { playerId: string; place: number }[] }; exclude?: string } = {},
 ): Promise<Json> {
-  const { data, error } = await db
-    .from("matches")
-    .select("id, tournament_id, p1, p2, winner_id, finished_at, tournaments!inner(date, status)")
-    .eq("status", "done")
-    .eq("is_bye", false);
+  const [{ data, error }, results] = await Promise.all([
+    db
+      .from("matches")
+      .select("id, tournament_id, p1, p2, winner_id, finished_at, tournaments!inner(date, status)")
+      .eq("status", "done")
+      .eq("is_bye", false),
+    db.from("tournament_results").select("tournament_id, player_id, place"),
+  ]);
   if (error) throw error;
+  if (results.error) throw results.error;
+  const includeId = opts.include?.id;
+
+  const placements: EloPlacement[] = [
+    ...results.data
+      .filter((r) => r.tournament_id !== opts.exclude && r.tournament_id !== includeId)
+      .map((r) => ({ tournamentId: r.tournament_id, playerId: r.player_id, place: r.place })),
+    ...(opts.include?.results ?? []).map((r) => ({ tournamentId: opts.include!.id, playerId: r.playerId, place: r.place })),
+  ];
 
   const matches: EloMatch[] = data
     .filter(
       (m) =>
         m.tournament_id !== opts.exclude &&
-        (m.tournaments.status === "done" || m.tournament_id === opts.include) &&
+        (m.tournaments.status === "done" || m.tournament_id === includeId) &&
         m.p1 &&
         m.p2 &&
         m.winner_id,
@@ -54,7 +68,7 @@ export async function eloPayload(
       winnerId: m.winner_id!,
     }));
 
-  const { history } = computeElo(matches, settings);
+  const { history } = computeElo(matches, settings, placements);
   return history.map((h) => ({
     match_id: h.matchId,
     player_id: h.playerId,

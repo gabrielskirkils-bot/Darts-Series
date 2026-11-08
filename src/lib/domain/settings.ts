@@ -7,7 +7,10 @@ import { DEFAULT_FORMATS, type MatchFormats, type StageFormat } from "./structur
 
 export type AppSettings = {
   points: PointsRow[];
+  /** K per match. */
   eloK: number;
+  /** K for the final placing of each tournament. */
+  eloPlaceK: number;
   eloStart: number;
   boards: number;
   askDoubles: boolean;
@@ -17,6 +20,7 @@ export type AppSettings = {
 export const DEFAULT_SETTINGS: AppSettings = {
   points: DEFAULT_POINTS,
   eloK: DEFAULT_ELO.k,
+  eloPlaceK: DEFAULT_ELO.placeK,
   eloStart: DEFAULT_ELO.start,
   boards: 2,
   askDoubles: true,
@@ -25,6 +29,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
 
 export const LIMITS = {
   eloK: { min: 1, max: 100 },
+  eloPlaceK: { min: 0, max: 200 },
   eloStart: { min: 100, max: 3000 },
   boards: { min: 1, max: 8 },
   place: { min: 1, max: 1000 },
@@ -60,6 +65,7 @@ export function parseSettings(data: unknown): AppSettings {
   return {
     points: points && points.length ? sortPointsRows(points) : DEFAULT_SETTINGS.points.map((r) => ({ ...r })),
     eloK: num(d.eloK, DEFAULT_SETTINGS.eloK),
+    eloPlaceK: num(d.eloPlaceK, DEFAULT_SETTINGS.eloPlaceK),
     eloStart: num(d.eloStart, DEFAULT_SETTINGS.eloStart),
     boards: num(d.boards, DEFAULT_SETTINGS.boards),
     askDoubles: typeof d.askDoubles === "boolean" ? d.askDoubles : DEFAULT_SETTINGS.askDoubles,
@@ -82,6 +88,7 @@ export type SettingsError =
   | "placeDuplicate"
   | "ptsInvalid"
   | "eloKInvalid"
+  | "eloPlaceKInvalid"
   | "eloStartInvalid"
   | "boardsInvalid"
   | "formatInvalid";
@@ -103,6 +110,7 @@ export function validateSettings(s: AppSettings): SettingsError[] {
     if (!intIn(r.pts, LIMITS.pts.min, LIMITS.pts.max)) errors.add("ptsInvalid");
   }
   if (!intIn(s.eloK, LIMITS.eloK.min, LIMITS.eloK.max)) errors.add("eloKInvalid");
+  if (!intIn(s.eloPlaceK, LIMITS.eloPlaceK.min, LIMITS.eloPlaceK.max)) errors.add("eloPlaceKInvalid");
   if (!intIn(s.eloStart, LIMITS.eloStart.min, LIMITS.eloStart.max)) errors.add("eloStartInvalid");
   if (!intIn(s.boards, LIMITS.boards.min, LIMITS.boards.max)) errors.add("boardsInvalid");
   for (const f of [s.fmt.group, s.fmt.ko, s.fmt.final]) {

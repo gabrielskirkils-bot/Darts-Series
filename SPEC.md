@@ -155,9 +155,10 @@ On finish, `tournament_results` stores place and points (frozen, so later table 
 - Empty state: 3-step onboarding (add players → create tournament → open a board).
 
 ### 4.11 Elo
-- Start 1500, K = 32 (configurable).
+- Start 1500; match K = 16, placing K = 48 (both configurable).
 - All finished matches (not byes; fallback entries included), chronologically: tournament date, then `finished_at`.
 - `E_a = 1 / (1 + 10^((R_b − R_a) / 400))`, `R_a' = R_a + K × (S_a − E_a)`.
+- **Placing step:** after a finished tournament's last match, every pair of entrants counts as one more result decided by final place (better place = 1, shared place = 0.5), each worth `placing K / (entrants − 1)`. Going further always counts: e.g. a player out in the groups ends below one who lost their first playoff match. The step is stored on each player's last match row of that tournament (no extra rows).
 - Always recompute fully (data is small) and store `elo_history`. "Elo change" for a tournament = rating after the player's last match there − rating before their first.
 - Also used for seeding in the wizard.
 
@@ -178,7 +179,7 @@ On finish, `tournament_results` stores place and points (frozen, so later table 
 - Updates via Supabase Realtime, no reload. `prefers-reduced-motion` → no animation.
 
 ### 4.14 Settings `/settings` (organizer)
-Points table (add/remove rows), Elo K and start rating, default formats for the three stages, default board count, "Ask darts at double".
+Points table (add/remove rows), Elo match K, placing K and start rating, default formats for the three stages, default board count, "Ask darts at double".
 
 ---
 

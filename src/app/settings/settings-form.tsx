@@ -24,6 +24,7 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
   );
   const [nextKey, setNextKey] = useState(initial.points.length);
   const [eloK, setEloK] = useState(String(initial.eloK));
+  const [eloPlaceK, setEloPlaceK] = useState(String(initial.eloPlaceK));
   const [eloStart, setEloStart] = useState(String(initial.eloStart));
   const [boards, setBoards] = useState(initial.boards);
   const [askDoubles, setAskDoubles] = useState(initial.askDoubles);
@@ -35,6 +36,7 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
     return {
       points: rows.map((r) => ({ place: toNumber(r.place), pts: toNumber(r.pts) })),
       eloK: toNumber(eloK),
+      eloPlaceK: toNumber(eloPlaceK),
       eloStart: toNumber(eloStart),
       boards,
       askDoubles,
@@ -167,7 +169,7 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
       <section className={`${card} grid gap-4 sm:grid-cols-3`}>
         <div className="space-y-2 sm:col-span-2">
           <h2 className="font-display text-xl font-bold uppercase">{copy.settings.elo.title}</h2>
-          <div className="grid max-w-sm grid-cols-2 gap-2">
+          <div className="grid max-w-md grid-cols-3 gap-2">
             <div>
               <label htmlFor="elo-k" className={label}>
                 {copy.settings.elo.k}
@@ -178,6 +180,18 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
                 className={`${input} num text-lg`}
                 value={eloK}
                 onChange={(e) => setEloK(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="elo-place-k" className={label}>
+                {copy.settings.elo.placeK}
+              </label>
+              <input
+                id="elo-place-k"
+                inputMode="numeric"
+                className={`${input} num text-lg`}
+                value={eloPlaceK}
+                onChange={(e) => setEloPlaceK(e.target.value)}
               />
             </div>
             <div>

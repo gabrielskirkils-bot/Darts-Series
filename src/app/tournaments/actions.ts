@@ -216,7 +216,11 @@ async function saveResults(tournamentId: string, finish: boolean): Promise<Tourn
     if (results.length !== t.entrants.length) return fail("results_incomplete");
 
     const supabase = await createClient();
-    const elo = await eloPayload(supabase, { k: settings.eloK, start: settings.eloStart }, { include: t.id });
+    const elo = await eloPayload(
+      supabase,
+      { k: settings.eloK, placeK: settings.eloPlaceK, start: settings.eloStart },
+      { include: { id: t.id, results } },
+    );
     const { error } = await supabase.rpc("save_results", {
       p_tournament: t.id,
       p_finish: finish,
@@ -246,7 +250,11 @@ export async function deleteTournament(tournamentId: string): Promise<Tournament
     if (!UUID_RE.test(tournamentId)) return fail("not_found");
     const settings = await getSettings();
     const supabase = await createClient();
-    const elo = await eloPayload(supabase, { k: settings.eloK, start: settings.eloStart }, { exclude: tournamentId });
+    const elo = await eloPayload(
+      supabase,
+      { k: settings.eloK, placeK: settings.eloPlaceK, start: settings.eloStart },
+      { exclude: tournamentId },
+    );
     const { error } = await supabase.rpc("delete_tournament", { p_tournament: tournamentId, p_elo: elo });
     if (error) return rpcFailure(error);
   } catch (error) {

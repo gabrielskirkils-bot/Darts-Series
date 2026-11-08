@@ -17,7 +17,7 @@ test.describe("RLS for anonymous users", () => {
   test("can read public tables", async () => {
     const { data, error } = await anon().from("settings").select("data").single();
     expect(error).toBeNull();
-    expect(data?.data).toMatchObject({ eloK: 32 });
+    expect(data?.data).toMatchObject({ eloK: expect.any(Number), eloStart: expect.any(Number) });
   });
 
   test("cannot insert", async () => {
