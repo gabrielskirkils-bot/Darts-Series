@@ -9,7 +9,7 @@ Vitest · Playwright · hosted on Vercel.
 
 ## Run it locally
 
-1. Node.js 22 or newer.
+1. Node.js 24 (what Vercel runs; newer versions work locally too).
 2. Copy `.env.example` to `.env.local` and fill in your Supabase project URL and publishable key
    (Supabase dashboard → Project Settings → API).
 3. Install and start:
@@ -55,7 +55,8 @@ npx supabase gen types typescript --project-id <id> > src/lib/supabase/types.ts
 ## Deploy to Vercel
 
 1. Push this repository to GitHub (or GitLab / Bitbucket).
-2. In Vercel: **Add New → Project**, import the repository. The framework (Next.js) is detected.
+2. In Vercel: **Add New → Project**, import the repository. `vercel.json` pins the framework to
+   Next.js, so the Framework Preset setting doesn't matter.
 3. Add the environment variables `NEXT_PUBLIC_SUPABASE_URL` and
    `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (same values as `.env.local`), then deploy.
 4. In Supabase → **Authentication → URL Configuration**:
