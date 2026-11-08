@@ -1,5 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { buildVisit, lastVisit, matchState, planVisit, type MatchSetup, type Visit } from "./match";
+import {
+  buildVisit,
+  lastVisit,
+  manualResultWinner,
+  matchState,
+  planVisit,
+  type MatchSetup,
+  type Visit,
+} from "./match";
+
+describe("manualResultWinner (fallback entry)", () => {
+  it("accepts finished best-of results", () => {
+    expect(manualResultWinner(5, 3, 1)).toBe(0);
+    expect(manualResultWinner(5, 2, 3)).toBe(1);
+    expect(manualResultWinner(3, 0, 2)).toBe(1);
+    expect(manualResultWinner(1, 1, 0)).toBe(0);
+  });
+
+  it("rejects unfinished, overlong or invalid scores", () => {
+    expect(manualResultWinner(5, 2, 1)).toBeNull();
+    expect(manualResultWinner(5, 3, 3)).toBeNull();
+    expect(manualResultWinner(5, 4, 0)).toBeNull();
+    expect(manualResultWinner(3, -1, 2)).toBeNull();
+    expect(manualResultWinner(3, 2, 1.5)).toBeNull();
+  });
+});
 
 const setup: MatchSetup = { startScore: 301, bestOf: 3, firstStarter: 0 };
 

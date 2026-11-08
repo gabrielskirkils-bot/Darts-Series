@@ -3,7 +3,8 @@
 import type { RoundName } from "@/lib/domain/bracket";
 import type { PlayerInputError, PlayerSortKey } from "@/lib/domain/players";
 import type { SettingsError } from "@/lib/domain/settings";
-import type { StructureError } from "@/lib/domain/structure";
+import type { Format, MatchFormats, StageFormat, StructureError } from "@/lib/domain/structure";
+import type { TournamentInputError, TournamentStatus } from "@/lib/domain/tournament";
 
 export const copy = {
   appName: "Darts Series",
@@ -183,7 +184,173 @@ export const copy = {
     lastN: "Last",
   } satisfies Record<RoundName, string>,
 
+  roundNamesPlural: {
+    final: "Final",
+    semiFinal: "Semi-finals",
+    quarterFinal: "Quarter-finals",
+    last16: "Last 16",
+    last32: "Last 32",
+    lastN: "Last",
+  } satisfies Record<RoundName, string>,
+
   thirdPlace: "Third-place match",
+
+  formatNames: {
+    groups_ko: "Groups + knockout",
+    ko: "Knockout only",
+    rr: "Round robin",
+  } satisfies Record<Format, string>,
+
+  tournaments: {
+    title: "Tournaments",
+    new: "New tournament",
+    empty: "No tournaments yet.",
+    emptyOrganizer: "No tournaments yet. Create the first one.",
+    playerCount: (n: number) => `${n} ${n === 1 ? "player" : "players"}`,
+    status: { groups: "Groups", ko: "Knockout", done: "Finished" } satisfies Record<TournamentStatus, string>,
+  },
+
+  wizard: {
+    title: "New tournament",
+    loginNeeded: "Creating tournaments is for organizers. Log in with an organizer account.",
+    defaultName: (n: number) => `Event #${n}`,
+    sections: {
+      details: "Name and date",
+      players: "Players",
+      structure: "Structure",
+      formats: "Match format",
+      boards: "Boards",
+      preview: "Preview",
+    },
+    name: "Name",
+    date: "Date",
+    search: "Search players",
+    searchPlaceholder: "Search by name or nickname",
+    selected: (n: number) => `${n} selected`,
+    selectShown: "Select shown",
+    clear: "Clear",
+    noPlayers: "No active players yet. Add the first one below.",
+    noMatches: "No players match your search.",
+    quickAdd: "Add new player",
+    format: "Format",
+    groups: "Groups",
+    advance: "Qualifiers per group",
+    thirdPlace: "Third-place match",
+    seeding: "Seeding",
+    seedingOptions: { elo: "By Elo (snake)", random: "Random" },
+    suggest: "Suggest automatically",
+    suggestedNote: "Suggested for the number of players and updated as you pick them, until you change a setting.",
+    manualNote: "You changed the structure, so it no longer follows the player count.",
+    decrease: (what: string) => `Fewer ${what.toLowerCase()}`,
+    increase: (what: string) => `More ${what.toLowerCase()}`,
+    boards: "Number of boards",
+    roundRobinNote: "Everyone plays everyone; places follow the table.",
+    stageRr: "Matches",
+    preview: {
+      groups: (sizes: number[]) =>
+        sizes.length === 1 ? `1 group of ${sizes[0]}` : `${sizes.length} groups: ${sizes.join(", ")}`,
+      roundRobin: (n: number) => `Round robin, ${n} players`,
+      bracket: (label: string, byes: number) => (byes ? `${label}, ${byes} ${byes === 1 ? "bye" : "byes"}` : label),
+      thirdPlace: "plus a third-place match",
+      matches: (n: number) => `${n} ${n === 1 ? "match" : "matches"}`,
+      duration: "Estimated duration",
+      split: (groups: string, knockout: string) => `Groups ${groups} · Knockout ${knockout}`,
+      selectPlayers: "Select at least 2 players to see the preview.",
+    },
+    submit: "Create tournament",
+    creating: "Creating…",
+    inputErrors: {
+      nameRequired: "Enter a name.",
+      nameTooLong: "Name is too long (max 80 characters).",
+      dateInvalid: "Pick a valid date.",
+      duplicatePlayers: "A player is selected twice.",
+      boardsInvalid: "Boards must be 1–8.",
+      formatInvalid: "Pick a valid start score and best-of for each stage.",
+      tooFewPlayers: "Select at least 2 players.",
+      groupTooSmall: "Each group needs at least 2 players.",
+      advanceTooHigh: "Qualifiers per group can't exceed the smallest group.",
+      advanceOutOfRange: "Qualifiers per group must be 1–4.",
+      knockoutTooSmall: "The knockout needs at least 2 players.",
+    } satisfies Record<TournamentInputError, string>,
+    invalidInput: "Some tournament details are invalid. Reload the page and try again.",
+    playersChanged: "Some selected players were archived or removed. Reload the page and try again.",
+  },
+
+  tournament: {
+    back: "All tournaments",
+    progress: (done: number, total: number) => `${done} / ${total} matches`,
+    progressLabel: "Progress",
+    boards: "Boards",
+    board: (n: number) => `Board ${n}`,
+    tv: "TV view",
+    startKnockout: "Start knockout",
+    startKnockoutHint: "All group matches are done. The bracket is drawn from the final tables.",
+    redraw: "Redraw groups",
+    redrawHint: "Possible until the first group match starts.",
+    redrawElo: "Redraw by Elo",
+    redrawRandom: "Redraw randomly",
+    delete: "Delete tournament",
+    confirmDelete: "Delete permanently",
+    deleteWarning: "This removes the tournament with all its matches and scores. It can't be undone.",
+    working: "Working…",
+    tabs: { groups: "Groups", bracket: "Bracket", matches: "Matches" },
+    tabsLabel: "Tournament sections",
+    groupName: (i: number) => `Group ${String.fromCharCode(65 + i)}`,
+    table: {
+      pos: "#",
+      player: "Player",
+      played: "P",
+      wins: "W",
+      losses: "L",
+      legs: "Legs",
+      diff: "+/−",
+      playedLong: "Played",
+      winsLong: "Won",
+      lossesLong: "Lost",
+      diffLong: "Leg difference",
+    },
+    qualifies: "Qualifies",
+    qualifyLegend: (n: number) => `Top ${n} of each group go through to the knockout.`,
+    groupMatches: "Matches",
+    roundShort: (n: number) => `R${n}`,
+    bracketPending: "The bracket is drawn when all group matches are done and the knockout starts.",
+    lists: { live: "Live", waiting: "Waiting", finished: "Finished" },
+    noLive: "No match is being played.",
+    noWaiting: "No matches waiting.",
+    noFinished: "No finished matches yet.",
+    groupRound: (group: string, round: number) => `${group} · Round ${round}`,
+    tbd: "TBD",
+    bye: "Bye",
+    manual: "Entered manually",
+    winner: "winner",
+    standings: "Table",
+    onBoard: (n: number) => `Board ${n}`,
+    bestOf: (start: number, bestOf: number) => `${start} · Best of ${bestOf}`,
+    enterResult: "Enter result",
+    editResult: "Edit result",
+    legsFor: (name: string) => `Legs won by ${name}`,
+    saveResult: "Save result",
+    resultHint: (bestOf: number) => `Legs only, first to ${Math.ceil(bestOf / 2)}. No visit stats are recorded.`,
+    unknownPlayer: "Unknown player",
+    errors: {
+      not_found: "Tournament not found.",
+      not_organizer: "Only organizers can do this. Log in with an organizer account.",
+      groups_started: "A group match has already started, so groups can't be redrawn.",
+      groups_closed: "The group stage is over.",
+      knockout_not_allowed: "The knockout can't be started for this tournament.",
+      groups_unfinished: "Finish every group match before starting the knockout.",
+      knockout_exists: "The knockout has already started.",
+      is_bye: "A bye has no result to enter.",
+      match_live: "This match is being played on a board right now.",
+      has_visits: "This match was scored visit by visit, so its leg score can't be edited here.",
+      bad_winner: "The winner must be one of the two players.",
+      tournament_done: "The tournament is finished.",
+      next_match_started: "The next match has already started, so this winner can't change.",
+      nextMatchStarted: "The next match has already started, so this winner can't change.",
+      invalidScore: "Enter a finished score: one player must reach the winning number of legs.",
+      notEditable: "This match's result can't be entered here.",
+    },
+  },
 
   notFound: {
     title: "Not found",
@@ -195,6 +362,42 @@ export const copy = {
 /** "Final", "Semi-final", … "Last 64". */
 export function roundLabel(round: { name: RoundName; size: number }): string {
   return round.name === "lastN" ? `${copy.roundNames.lastN} ${round.size}` : copy.roundNames[round.name];
+}
+
+/** "Quarter-finals", "Semi-finals", "Final", "Last 64". */
+export function roundLabelPlural(round: { name: RoundName; size: number }): string {
+  return round.name === "lastN" ? `${copy.roundNamesPlural.lastN} ${round.size}` : copy.roundNamesPlural[round.name];
+}
+
+function stageText(f: StageFormat): string {
+  return `${f.start} bo${f.bestOf}`;
+}
+
+/**
+ * "4 groups · top 2 · Quarter-finals · Groups 301 bo3 · Knockout 501 bo5 · Final 501 bo7".
+ * `firstRound` is the first knockout round (null without a knockout).
+ */
+export function formatSummary(t: {
+  format: Format;
+  groupCount: number;
+  advance: number;
+  rounds: number;
+  firstRound: { name: RoundName; size: number } | null;
+  fmt: MatchFormats;
+}): string {
+  const parts: string[] = [];
+  if (t.format === "rr") {
+    parts.push(copy.formatNames.rr, `${copy.wizard.stageRr} ${stageText(t.fmt.group)}`);
+    return parts.join(" · ");
+  }
+  if (t.format === "groups_ko") {
+    parts.push(t.groupCount === 1 ? "1 group" : `${t.groupCount} groups`, `top ${t.advance}`);
+  }
+  if (t.firstRound) parts.push(roundLabelPlural(t.firstRound));
+  if (t.format === "groups_ko") parts.push(`${copy.settings.formats.stage.group} ${stageText(t.fmt.group)}`);
+  if (t.rounds >= 2) parts.push(`${copy.settings.formats.stage.ko} ${stageText(t.fmt.ko)}`);
+  if (t.rounds >= 1) parts.push(`${copy.settings.formats.stage.final} ${stageText(t.fmt.final)}`);
+  return parts.join(" · ");
 }
 
 /** Elo for display: whole number. */

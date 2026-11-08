@@ -30,6 +30,34 @@ test("an invalid magic link shows a friendly error", async ({ page }) => {
   await expect(page.getByText("invalid or has expired")).toBeVisible();
 });
 
+test("tournaments list is public and read-only", async ({ page }) => {
+  await page.goto("/tournaments");
+  await expect(page.getByRole("heading", { name: "Tournaments" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /New tournament/ })).toHaveCount(0);
+});
+
+test("a tournament page shows no organizer actions", async ({ page }) => {
+  await page.goto("/tournaments");
+  const first = page.locator('a[href^="/t/"]').first();
+  test.skip((await first.count()) === 0, "No tournament to open");
+  await first.click();
+  await expect(page.getByRole("tab", { name: "Matches" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Delete tournament" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Enter result|Edit result/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Board 1" })).toHaveCount(0);
+});
+
+test("the wizard asks anonymous users to log in", async ({ page }) => {
+  await page.goto("/tournaments/new");
+  await expect(page.getByText("Creating tournaments is for organizers")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create tournament" })).toHaveCount(0);
+});
+
+test("an unknown tournament shows not found", async ({ page }) => {
+  await page.goto("/t/00000000-0000-0000-0000-000000000000");
+  await expect(page.getByRole("heading", { name: "Not found" })).toBeVisible();
+});
+
 test("an unknown player shows not found", async ({ page }) => {
   // Streamed inside <Suspense>, so the HTTP status stays 200; check the rendered page.
   await page.goto("/players/00000000-0000-0000-0000-000000000000");

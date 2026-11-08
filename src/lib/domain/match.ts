@@ -174,6 +174,19 @@ export function buildVisit(state: MatchState, input: VisitInput): Visit {
   };
 }
 
+/**
+ * Fallback entry (leg score only): the winning side if the legs form a finished
+ * best-of-N result, otherwise null. E.g. bo5: 3–1 → 0, 2–3 → 1, 3–3 / 2–1 → null.
+ */
+export function manualResultWinner(bestOf: number, legsP1: number, legsP2: number): Side | null {
+  const need = legsToWin(bestOf);
+  const valid = (n: number) => Number.isInteger(n) && n >= 0;
+  if (!valid(legsP1) || !valid(legsP2)) return null;
+  if (legsP1 === need && legsP2 < need) return 0;
+  if (legsP2 === need && legsP1 < need) return 1;
+  return null;
+}
+
 /** The visit that undo deletes (the most recent one), or null if none. */
 export function lastVisit(visits: readonly Visit[]): Visit | null {
   let last: Visit | null = null;

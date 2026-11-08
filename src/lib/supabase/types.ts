@@ -530,7 +530,26 @@ export type Database = {
       }
     }
     Functions: {
+      apply_match_result: {
+        Args: {
+          p_legs_p1: number
+          p_legs_p2: number
+          p_match: string
+          p_slots: Json
+          p_winner: string
+        }
+        Returns: undefined
+      }
+      create_tournament: { Args: { p: Json }; Returns: string }
       is_organizer: { Args: never; Returns: boolean }
+      redraw_groups: {
+        Args: { p: Json; p_tournament: string }
+        Returns: undefined
+      }
+      start_knockout: {
+        Args: { p: Json; p_tournament: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
