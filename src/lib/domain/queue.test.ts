@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { knockoutSortOrder, liveOnBoard, nextMatch, waitingMatches, type QueueMatch } from "./queue";
+import {
+  boardAssignments,
+  knockoutSortOrder,
+  liveOnBoard,
+  nextMatch,
+  waitingMatches,
+  type QueueMatch,
+} from "./queue";
 
 const m = (id: string, p1: string | null, p2: string | null, sortOrder: number, extra: Partial<QueueMatch> = {}): QueueMatch => ({
   id,
@@ -10,6 +17,31 @@ const m = (id: string, p1: string | null, p2: string | null, sortOrder: number, 
   isBye: false,
   board: null,
   ...extra,
+});
+
+describe("boardAssignments (TV)", () => {
+  it("live boards show their match; free boards get distinct next matches with free players", () => {
+    const matches = [
+      m("live", "a", "b", 0, { status: "live", board: 2 }),
+      m("m1", "a", "c", 1), // a busy
+      m("m2", "d", "e", 2),
+      m("m3", "d", "f", 3), // d would be busy after m2 goes to board 1
+      m("m4", "g", "h", 4),
+    ];
+    const result = boardAssignments(matches, 3);
+    expect(result.map((r) => [r.board, r.live?.id ?? null, r.next?.id ?? null])).toEqual([
+      [1, null, "m2"],
+      [2, "live", null],
+      [3, null, "m4"],
+    ]);
+  });
+
+  it("nothing to play leaves free boards empty", () => {
+    expect(boardAssignments([m("done", "a", "b", 0, { status: "done" })], 2)).toEqual([
+      { board: 1, live: null, next: null },
+      { board: 2, live: null, next: null },
+    ]);
+  });
 });
 
 describe("board queue", () => {

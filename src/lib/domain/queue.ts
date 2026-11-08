@@ -44,6 +44,32 @@ export function liveOnBoard<T extends QueueMatch>(matches: readonly T[], board: 
   return matches.find((m) => m.status === "live" && m.board === board) ?? null;
 }
 
+/**
+ * What each board shows on the TV: its live match, or for a free board the match it would
+ * play next. Free boards take waiting matches in queue order; a match handed to one board
+ * is not offered to the next, and its players count as busy.
+ */
+export function boardAssignments<T extends QueueMatch>(
+  matches: readonly T[],
+  boards: number,
+): { board: number; live: T | null; next: T | null }[] {
+  const busy = busyPlayers(matches);
+  const waiting = waitingMatches(matches);
+  const taken = new Set<string>();
+  return Array.from({ length: boards }, (_, i) => {
+    const board = i + 1;
+    const live = liveOnBoard(matches, board);
+    if (live) return { board, live, next: null };
+    const next = waiting.find((m) => !taken.has(m.id) && isPlayable(m, busy)) ?? null;
+    if (next) {
+      taken.add(next.id);
+      if (next.p1) busy.add(next.p1);
+      if (next.p2) busy.add(next.p2);
+    }
+    return { board, live: null, next };
+  });
+}
+
 /** sort_order for knockout matches: after all group matches, third-place just before the final. */
 export function knockoutSortOrder(
   stage: "ko" | "third",

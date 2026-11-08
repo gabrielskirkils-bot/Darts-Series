@@ -10,6 +10,7 @@ import {
   canStartKnockout,
   groupTables,
   knockoutFormat,
+  latestResults,
   matchBuckets,
   normalizeStructure,
   parseKoMeta,
@@ -472,6 +473,17 @@ describe("finishing (SPEC 4.9)", () => {
       ["p3", 3, 60],
     ]);
     expect(finishBlocker("rr", "done", matches)).toBe("alreadyFinished");
+  });
+});
+
+describe("latestResults (TV ticker)", () => {
+  it("newest finished matches first, byes and unfinished left out", () => {
+    const ms = rows(planDraw(entrants(6), config({ format: "ko" }), Math.random).matches);
+    const real = ms.filter((m) => m.round === 1 && !m.isBye);
+    Object.assign(real[0]!, { status: "done", winnerId: real[0]!.p1, finishedAt: "2026-11-08T18:00:00Z" });
+    Object.assign(real[1]!, { status: "done", winnerId: real[1]!.p2, finishedAt: "2026-11-08T18:20:00Z" });
+    expect(latestResults(ms, 5).map((m) => m.id)).toEqual([real[1]!.id, real[0]!.id]);
+    expect(latestResults(ms, 1)).toHaveLength(1);
   });
 });
 

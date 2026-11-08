@@ -53,6 +53,23 @@ test("the wizard asks anonymous users to log in", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Create tournament" })).toHaveCount(0);
 });
 
+test("the TV view is public and fills the screen", async ({ page }) => {
+  await page.goto("/tournaments");
+  const first = page.locator('a[href^="/t/"]').first();
+  test.skip((await first.count()) === 0, "No tournament to open");
+  const href = await first.getAttribute("href");
+  await page.goto(`${href}/tv`);
+  await expect(page.getByText("Latest results")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Enter result|Delete tournament/ })).toHaveCount(0);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("an unknown tournament's TV shows not found", async ({ page }) => {
+  await page.goto("/t/00000000-0000-0000-0000-000000000000/tv");
+  await expect(page.getByRole("heading", { name: "Not found" })).toBeVisible();
+});
+
 test("board screens ask anonymous users to log in", async ({ page }) => {
   await page.goto("/t/00000000-0000-0000-0000-000000000000/board/1");
   await expect(page.getByText("Board screens are for organizers")).toBeVisible();

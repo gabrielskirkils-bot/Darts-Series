@@ -50,6 +50,27 @@ body {
   outline-offset: 2px;
 }
 
+/* TV: the rotating panel's progress bar fills over one slide. */
+@keyframes tv-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.tv-progress {
+  transform-origin: left;
+  animation: tv-progress var(--tv-slide-ms, 12000ms) linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-progress {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

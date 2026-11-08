@@ -108,6 +108,7 @@ export function toMatchRow(m: Tables<"matches">): MatchRow {
     bestOf: m.best_of,
     startScore: m.start_score,
     board: m.board,
+    finishedAt: m.finished_at,
   };
 }
 

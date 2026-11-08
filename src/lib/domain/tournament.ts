@@ -198,7 +198,17 @@ export type MatchRow = {
   bestOf: number;
   startScore: number;
   board: number | null;
+  /** ISO timestamp, set once the match is done. */
+  finishedAt?: string | null;
 };
+
+/** The most recently finished real matches (byes left out), newest first. */
+export function latestResults(matches: readonly MatchRow[], limit: number): MatchRow[] {
+  return matches
+    .filter((m) => m.status === "done" && !m.isBye && m.winnerId)
+    .sort((a, b) => (b.finishedAt ?? "").localeCompare(a.finishedAt ?? "") || b.sortOrder - a.sortOrder)
+    .slice(0, limit);
+}
 
 /** One table per group (A, B, …) from finished group matches. Players listed by seed. */
 export function groupTables(

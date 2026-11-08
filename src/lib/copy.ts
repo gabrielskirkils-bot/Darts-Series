@@ -285,6 +285,28 @@ export const copy = {
     keyboardHint: "Keyboard: digits, Enter, Backspace, Ctrl+Z to undo.",
   },
 
+  tv: {
+    pageTitle: (name: string) => `${name} · TV`,
+    board: (n: number) => `Board ${n}`,
+    free: "Free",
+    next: "Next",
+    versus: "v",
+    lastVisit: "Last",
+    average: "Avg",
+    legs: "Legs",
+    toThrow: "Throwing",
+    slides: {
+      groups: "Group tables",
+      bracket: "Bracket",
+      leaders: "Today's leaders",
+      ranking: "Overall ranking",
+    },
+    latest: "Latest results",
+    noResults: "No results yet.",
+    winner: (name: string) => `Winner: ${name}`,
+    slideOf: (i: number, n: number) => `${i} of ${n}`,
+  },
+
   board: {
     title: (n: number) => `Board ${n}`,
     loginNeeded: "Board screens are for organizers. Log in with an organizer account.",
