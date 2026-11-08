@@ -12,6 +12,7 @@ import {
   groupEliminatedPlaces,
   groupsKnockoutPlaces,
   knockoutPlaces,
+  nonQualifiedPlaces,
   roundRobinPlaces,
 } from "./placements";
 
@@ -138,5 +139,31 @@ describe("groupsKnockoutPlaces", () => {
     expect(new Set(places.map((p) => p.playerId)).size).toBe(11);
     expect(placeMap(places).A1).toBe(1);
     expect(findMatch(ko.matches, "ko", 3, 0)!.winnerId).toBe("A1");
+  });
+
+  it("best third places in the bracket: placed once, by the knockout (3 groups of 3, 8 qualify)", () => {
+    const tables = ["A", "B", "C"].map((g) => [1, 2, 3].map((p) => row(`${g}${p}`, p)));
+    // Top 2 of each group plus the two best thirds (B3, C3); A3 is out.
+    const order = ["A1", "C1", "B1", "A2", "B2", "C2", "C3", "B3"];
+    const ko = generateKnockout(
+      order.map((playerId) => ({ playerId, group: "ABC".indexOf(playerId[0]!) })),
+      3,
+      false,
+    );
+    playOut(ko, order);
+    const places = groupsKnockoutPlaces(tables, 2, ko.matches, ko.rounds);
+    expect(places).toHaveLength(9);
+    expect(new Set(places.map((p) => p.playerId)).size).toBe(9);
+    const map = placeMap(places);
+    expect(map.A3).toBe(9);
+    expect([map.B3, map.C3]).toEqual([5, 5]);
+  });
+});
+
+describe("nonQualifiedPlaces", () => {
+  it("matches groupEliminatedPlaces when the top A of each group qualified", () => {
+    const tables = ["A", "B", "C", "D"].map((g) => [1, 2, 3, 4].map((p) => row(`${g}${p}`, p)));
+    const qualified = new Set(tables.flatMap((rows) => rows.filter((r) => r.position <= 2).map((r) => r.playerId)));
+    expect(nonQualifiedPlaces(tables, qualified)).toEqual(groupEliminatedPlaces(tables, 2));
   });
 });

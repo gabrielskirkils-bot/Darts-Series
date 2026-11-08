@@ -59,6 +59,27 @@ export function groupEliminatedPlaces(
   return places;
 }
 
+/**
+ * Players who never reached the knockout, by group position: everyone at the same position
+ * shares a place, starting after all knockout players. Unlike groupEliminatedPlaces this
+ * reads who actually qualified, so it also fits brackets filled with the best third-placed
+ * players (e.g. 3 groups of 3 → top 2 + 2 best thirds = 8).
+ */
+export function nonQualifiedPlaces(
+  tables: readonly (readonly StandingRow[])[],
+  qualified: ReadonlySet<string>,
+): Placement[] {
+  const maxPos = Math.max(0, ...tables.map((rows) => rows.length));
+  const places: Placement[] = [];
+  let next = qualified.size + 1;
+  for (let pos = 1; pos <= maxPos; pos++) {
+    const atPos = tables.flatMap((rows) => rows.filter((r) => r.position === pos && !qualified.has(r.playerId)));
+    for (const r of atPos) places.push({ playerId: r.playerId, place: next });
+    next += atPos.length;
+  }
+  return places;
+}
+
 /** Every player's place for a finished groups + knockout tournament. */
 export function groupsKnockoutPlaces(
   tables: readonly (readonly StandingRow[])[],
@@ -66,5 +87,13 @@ export function groupsKnockoutPlaces(
   koMatches: readonly KoMatch[],
   rounds: number,
 ): Placement[] {
-  return [...knockoutPlaces(koMatches, rounds), ...groupEliminatedPlaces(tables, advance)];
+  // Who played the knockout: everyone in a first-round slot (byes included).
+  const qualified = new Set<string>();
+  for (const m of koMatches) {
+    if (m.stage !== "ko" || m.round !== 1) continue;
+    if (m.p1) qualified.add(m.p1);
+    if (m.p2) qualified.add(m.p2);
+  }
+  if (qualified.size === 0) return [...knockoutPlaces(koMatches, rounds), ...groupEliminatedPlaces(tables, advance)];
+  return [...knockoutPlaces(koMatches, rounds), ...nonQualifiedPlaces(tables, qualified)];
 }
