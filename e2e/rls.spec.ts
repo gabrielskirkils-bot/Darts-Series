@@ -82,4 +82,15 @@ test.describe("RLS for anonymous users", () => {
     ]);
     for (const call of calls) expect(call.error).not.toBeNull();
   });
+
+  test("cannot finish, recalculate or delete tournaments", async () => {
+    const db = anon();
+    const nil = "00000000-0000-0000-0000-000000000000";
+    const calls = await Promise.all([
+      db.rpc("save_results", { p_tournament: nil, p_finish: true, p_results: [], p_elo: [] }),
+      db.rpc("save_results", { p_tournament: nil, p_finish: false, p_results: [], p_elo: [] }),
+      db.rpc("delete_tournament", { p_tournament: nil, p_elo: [] }),
+    ]);
+    for (const call of calls) expect(call.error).not.toBeNull();
+  });
 });

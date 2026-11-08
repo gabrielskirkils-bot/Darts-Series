@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -5,15 +6,22 @@ import { StatusBadge } from "@/components/status-badge";
 import { alertError, btnSecondary } from "@/components/ui";
 import { copy, formatSummary } from "@/lib/copy";
 import { roundNameFromEnd } from "@/lib/domain/bracket";
-import { tournamentOverview } from "@/lib/domain/tournament";
+import { statsTable } from "@/lib/domain/ranking";
+import { finishBlocker, tournamentOverview } from "@/lib/domain/tournament";
 import { getViewer } from "@/lib/supabase/auth";
-import { getTournament } from "@/lib/supabase/tournaments";
+import { getTournament, getTournamentName } from "@/lib/supabase/tournaments";
 import { formatDate } from "@/lib/time";
 import { LiveRefresh } from "./live-refresh";
 import { TournamentActions } from "./tournament-actions";
 import { TournamentTabs } from "./tournament-tabs";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
+
+export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const name = UUID_RE.test(id) ? await getTournamentName(id).catch(() => null) : null;
+  return name ? { title: name } : {};
+}
 
 export default function TournamentPage({ params }: PageProps<"/t/[id]">) {
   return (
@@ -100,6 +108,8 @@ async function TournamentContent({ params }: { params: PageProps<"/t/[id]">["par
           tournamentId={t.id}
           canRedraw={overview.canRedraw}
           canStartKnockout={overview.canStartKnockout}
+          canFinish={finishBlocker(t.format, t.status, t.matches) === null}
+          finished={t.status === "done"}
           seeding={t.seeding}
         />
       )}
@@ -111,6 +121,9 @@ async function TournamentContent({ params }: { params: PageProps<"/t/[id]">["par
         overview={overview}
         names={names}
         canEdit={canEdit}
+        stats={statsTable(t.stats)}
+        results={t.results}
+        eloChanges={t.eloChanges}
       />
     </div>
   );

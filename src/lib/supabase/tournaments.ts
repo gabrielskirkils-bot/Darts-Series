@@ -2,7 +2,8 @@ import "server-only";
 import type { SlotUpdate } from "@/lib/domain/bracket";
 import type { Seeding } from "@/lib/domain/groups";
 import { parseSettings } from "@/lib/domain/settings";
-import { threeDartAverage } from "@/lib/domain/stats";
+import { tournamentEloChange, type EloRow } from "@/lib/domain/ranking";
+import { threeDartAverage, type StatTotals } from "@/lib/domain/stats";
 import type { Format, MatchFormats } from "@/lib/domain/structure";
 import {
   parseKoMeta,
@@ -15,6 +16,7 @@ import {
   type MatchStatus,
   type TournamentStatus,
 } from "@/lib/domain/tournament";
+import { toTotals } from "./ranking";
 import { createClient } from "./server";
 import type { Json, Tables } from "./types";
 
@@ -53,6 +55,13 @@ export async function countTournaments(): Promise<number> {
   return count ?? 0;
 }
 
+/** Just the name, for page titles. */
+export async function getTournamentName(id: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("tournaments").select("name").eq("id", id).maybeSingle();
+  return data?.name ?? null;
+}
+
 export type Entrant = EntrantRow & { name: string; nickname: string | null };
 
 export type TournamentDetail = {
@@ -72,6 +81,12 @@ export type TournamentDetail = {
   matches: MatchRow[];
   /** 3-dart average per player in this tournament (null without visit stats). */
   averages: Record<string, number | null>;
+  /** Visit stats per player (finished matches only). */
+  stats: Record<string, StatTotals>;
+  /** Frozen places and points (finished tournaments), best place first. */
+  results: { playerId: string; place: number; points: number }[];
+  /** Elo change per player over this tournament (finished tournaments). */
+  eloChanges: Record<string, number>;
 };
 
 export function toMatchRow(m: Tables<"matches">): MatchRow {
@@ -103,22 +118,42 @@ export async function getTournament(id: string): Promise<TournamentDetail | null
   if (error) throw error;
   if (!t) return null;
 
-  const [entrants, matches, stats] = await Promise.all([
+  const [entrants, matches, stats, results, elo] = await Promise.all([
     supabase
       .from("tournament_players")
       .select("player_id, seed, group_index, players(name, nickname)")
       .eq("tournament_id", id)
       .order("seed"),
     supabase.from("matches").select("*").eq("tournament_id", id).order("sort_order"),
-    supabase.from("player_tournament_stats").select("player_id, points, darts").eq("tournament_id", id),
+    supabase.from("player_tournament_stats").select("*").eq("tournament_id", id),
+    supabase.from("tournament_results").select("player_id, place, points").eq("tournament_id", id).order("place"),
+    supabase
+      .from("elo_history")
+      .select("player_id, rating_before, rating_after, played_at, match_id")
+      .eq("tournament_id", id)
+      .order("played_at")
+      .order("match_id"),
   ]);
-  if (entrants.error) throw entrants.error;
-  if (matches.error) throw matches.error;
-  if (stats.error) throw stats.error;
+  for (const r of [entrants, matches, stats, results, elo]) if (r.error) throw r.error;
 
   const averages: Record<string, number | null> = {};
-  for (const s of stats.data) {
-    if (s.player_id) averages[s.player_id] = threeDartAverage(s.points ?? 0, s.darts ?? 0);
+  const statsByPlayer: Record<string, StatTotals> = {};
+  for (const s of stats.data!) {
+    if (!s.player_id) continue;
+    statsByPlayer[s.player_id] = toTotals(s);
+    averages[s.player_id] = threeDartAverage(Number(s.points ?? 0), Number(s.darts ?? 0));
+  }
+
+  const eloRows: EloRow[] = elo.data!.map((h) => ({
+    tournamentId: id,
+    playerId: h.player_id,
+    ratingBefore: Number(h.rating_before),
+    ratingAfter: Number(h.rating_after),
+    playedAt: h.played_at,
+  }));
+  const eloChanges: Record<string, number> = {};
+  for (const pid of new Set(eloRows.map((h) => h.playerId))) {
+    eloChanges[pid] = tournamentEloChange(eloRows, pid, id) ?? 0;
   }
 
   return {
@@ -134,15 +169,18 @@ export async function getTournament(id: string): Promise<TournamentDetail | null
     boards: t.boards,
     fmt: parseSettings({ fmt: t.fmt }).fmt,
     ko: parseKoMeta(t.ko),
-    entrants: entrants.data.map((e) => ({
+    entrants: entrants.data!.map((e) => ({
       playerId: e.player_id,
       seed: e.seed,
       groupIndex: e.group_index,
       name: e.players?.name ?? "",
       nickname: e.players?.nickname ?? null,
     })),
-    matches: matches.data.map(toMatchRow),
+    matches: matches.data!.map(toMatchRow),
     averages,
+    stats: statsByPlayer,
+    results: results.data!.map((r) => ({ playerId: r.player_id, place: r.place, points: r.points })),
+    eloChanges,
   };
 }
 

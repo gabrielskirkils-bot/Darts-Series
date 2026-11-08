@@ -11,6 +11,7 @@
   --oche-red: #d8433a;
   --oche-green: #2f9e5b;
   --oche-gold: #e0b44c;
+  --oche-bronze: #c98a4b;
 }
 
 @theme inline {
@@ -23,6 +24,7 @@
   --color-board-red: var(--oche-red);
   --color-board-green: var(--oche-green);
   --color-gold: var(--oche-gold);
+  --color-bronze: var(--oche-bronze);
   --font-sans: var(--font-body);
   --font-display: var(--font-condensed);
 }

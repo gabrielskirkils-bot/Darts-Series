@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -8,12 +9,18 @@ import { busyPlayers, isPlayable, liveOnBoard, nextMatch, waitingMatches } from 
 import { getViewer } from "@/lib/supabase/auth";
 import { getSettings } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
-import { getTournament } from "@/lib/supabase/tournaments";
+import { getTournament, getTournamentName } from "@/lib/supabase/tournaments";
 import { fetchMatchVisits } from "@/lib/supabase/visits";
 import { LiveRefresh } from "../../live-refresh";
 import { BoardQueue } from "./board-queue";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
+
+export async function generateMetadata({ params }: PageProps<"/t/[id]/board/[n]">): Promise<Metadata> {
+  const { id, n } = await params;
+  const name = UUID_RE.test(id) ? await getTournamentName(id).catch(() => null) : null;
+  return name ? { title: `${copy.board.title(Number(n))} · ${name}` } : {};
+}
 
 export default function BoardPage({ params }: PageProps<"/t/[id]/board/[n]">) {
   return (

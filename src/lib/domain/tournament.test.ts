@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_POINTS } from "./points";
 import { DEFAULT_FORMATS, previewStructure, suggestStructure } from "./structure";
 import {
   bracketColumns,
   canEnterResult,
+  finalResults,
+  finishBlocker,
   canRedrawGroups,
   canStartKnockout,
   groupTables,
@@ -390,6 +393,85 @@ describe("planConfirm (SPEC 8.6)", () => {
     expect(planConfirm(ms, ms[0]!.id, 0, null)).toBeNull();
     ms[0]!.status = "live";
     expect(planConfirm(ms, ms[0]!.id, 0, null)).toEqual({ winnerId: ms[0]!.p1, slots: [] });
+  });
+});
+
+/** Plays every knockout match: the better seed (lower number) wins 3–0, winners advance. */
+function playKnockout(matches: MatchRow[], rounds: number) {
+  const ko = () => matches.filter((m) => m.stage !== "group");
+  for (let r = 1; r <= rounds; r++) {
+    for (const m of ko().filter((x) => x.round === r && !x.isBye && x.status !== "done")) {
+      const a = Number(m.p1!.slice(1));
+      const b = Number(m.p2!.slice(1));
+      const winner = a < b ? m.p1! : m.p2!;
+      m.status = "live";
+      const plan = planConfirm(matches, m.id, winner === m.p1 ? 0 : 1, rounds)!;
+      for (const s of plan.slots) {
+        const target = matches.find((x) => x.stage === s.stage && x.round === s.round && x.slot === s.slot)!;
+        target[s.side] = s.playerId;
+      }
+      Object.assign(m, { status: "done", winnerId: winner, legsP1: winner === m.p1 ? 3 : 0, legsP2: winner === m.p2 ? 3 : 0 });
+    }
+  }
+}
+
+describe("finishing (SPEC 4.9)", () => {
+  it("11 players, groups + knockout: every entrant placed, shared places, points", () => {
+    const plan = planDraw(entrants(11), config(), Math.random);
+    const matches = rows(plan.matches);
+    expect(finishBlocker("groups_ko", "groups", matches)).toBe("knockoutMissing");
+    finishGroups(matches);
+    const ko = planKnockoutFromGroups(groupTables(plan.players, matches, 3), 2, false, DEFAULT_FORMATS);
+    matches.push(...rows(ko.matches).map((m, i) => ({ ...m, id: `k${i}` })));
+    expect(finishBlocker("groups_ko", "ko", matches)).toBe("matchesUnfinished");
+    playKnockout(matches, ko.ko.rounds);
+    expect(finishBlocker("groups_ko", "ko", matches)).toBeNull();
+
+    const results = finalResults(
+      { format: "groups_ko", groupCount: 3, advance: 2, ko: ko.ko, entrants: plan.players, matches },
+      DEFAULT_POINTS,
+    );
+    expect(results).toHaveLength(11);
+    expect(new Set(results.map((r) => r.playerId)).size).toBe(11);
+    expect(results.map((r) => r.place)).toEqual([1, 2, 3, 3, 5, 5, 7, 7, 7, 10, 10]);
+    expect(results[0]).toEqual({ playerId: "p1", place: 1, points: 100 });
+    expect(results.map((r) => r.points)).toEqual([100, 75, 60, 60, 40, 40, 40, 40, 40, 25, 25]);
+  });
+
+  it("knockout only with third place: 3 and 4", () => {
+    const plan = planDraw(entrants(4), config({ format: "ko", thirdPlace: true }), Math.random);
+    const matches = rows(plan.matches);
+    playKnockout(matches, 2);
+    // The third-place match is played after the semis.
+    const third = matches.find((m) => m.stage === "third")!;
+    Object.assign(third, { status: "done", winnerId: third.p2, legsP1: 1, legsP2: 3 });
+    const results = finalResults(
+      { format: "ko", groupCount: 1, advance: 0, ko: plan.ko, entrants: plan.players, matches },
+      DEFAULT_POINTS,
+    );
+    expect(results.map((r) => [r.playerId, r.place])).toEqual([
+      ["p1", 1],
+      ["p2", 2],
+      [third.p2, 3],
+      [third.p1, 4],
+    ]);
+  });
+
+  it("round robin: places follow the table", () => {
+    const plan = planDraw(entrants(3), config({ format: "rr" }), Math.random);
+    const matches = rows(plan.matches);
+    finishGroups(matches);
+    expect(finishBlocker("rr", "groups", matches)).toBeNull();
+    const results = finalResults(
+      { format: "rr", groupCount: 1, advance: 0, ko: null, entrants: plan.players, matches },
+      DEFAULT_POINTS,
+    );
+    expect(results.map((r) => [r.playerId, r.place, r.points])).toEqual([
+      ["p1", 1, 100],
+      ["p2", 2, 75],
+      ["p3", 3, 60],
+    ]);
+    expect(finishBlocker("rr", "done", matches)).toBe("alreadyFinished");
   });
 });
 

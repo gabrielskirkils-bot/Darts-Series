@@ -1,5 +1,12 @@
 // All UI strings live here.
 
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th, 21st. */
+function ordinal(n: number): string {
+  const tens = n % 100;
+  const suffix = tens >= 11 && tens <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
+  return `${n}${suffix}`;
+}
+
 import { roundName, type RoundName } from "@/lib/domain/bracket";
 import type { PlayerInputError, PlayerSortKey } from "@/lib/domain/players";
 import type { SettingsError } from "@/lib/domain/settings";
@@ -31,6 +38,49 @@ export const copy = {
     loadError: "Couldn't load data. Check the connection and try again.",
     notAllowed: "Only organizers can do this. Log in with an organizer account.",
     genericError: "Something went wrong. Try again.",
+  },
+
+  ranking: {
+    period: "Period",
+    allTime: "All time",
+    summary: {
+      tournaments: "Tournaments",
+      matches: "Matches",
+      t180: "180s",
+      highestCheckout: "Highest checkout",
+      by: (name: string) => `by ${name}`,
+    },
+    inProgress: (name: string) => `${name} is in progress`,
+    openTournament: "Open tournament",
+    watchTv: "TV view",
+    podium: (name: string) => `Podium · ${name}`,
+    columns: {
+      pos: "#",
+      move: "Movement",
+      player: "Player",
+      points: "Pts",
+      tournaments: "Played",
+      wins: "Wins",
+      bestFinish: "Best",
+      average: "Avg",
+      t180: "180s",
+      highestCheckout: "High CO",
+      elo: "Elo",
+      pointsLong: "Points",
+      tournamentsLong: "Tournaments played",
+      winsLong: "Tournament wins",
+      bestFinishLong: "Best finish",
+      averageLong: "3-dart average",
+      highestCheckoutLong: "Highest checkout",
+    },
+    movement: {
+      new: "NEW",
+      up: (n: number) => `Up ${n}`,
+      down: (n: number) => `Down ${n}`,
+      same: "No change",
+    },
+    noResults: "No finished tournaments in this period.",
+    place: (n: number) => ordinal(n),
   },
 
   home: {
@@ -116,6 +166,44 @@ export const copy = {
     back: "All players",
     stats: { elo: "Elo", points: "Points", tournaments: "Tournaments" },
     profileEmpty: "Stats appear here once this player has finished a tournament.",
+  },
+
+  profile: {
+    position: "Ranking",
+    positionValue: (n: number) => `#${n}`,
+    points: "Points",
+    elo: "Elo",
+    eloChangeHint: "change in their last tournament",
+    tiles: {
+      average: "3-dart avg",
+      first9: "First-9 avg",
+      t180: "180s",
+      t140: "140+",
+      t100: "100+",
+      highestCheckout: "Highest checkout",
+      checkoutPercent: "Checkout %",
+      bestLeg: "Best leg",
+      matches: "Matches W–L",
+      legs: "Legs W–L",
+      wins: "Tournament wins",
+      bestFinish: "Best finish",
+    },
+    winLoss: (won: number, lost: number) => `${won}–${lost}`,
+    bestLegValue: (darts: number) => `${darts} darts`,
+    eloChart: "Elo over time",
+    averageChart: "Average per tournament",
+    chartTooFew: "Shown once there are at least two tournaments.",
+    chartStart: "Start",
+    history: "Tournament history",
+    historyColumns: { date: "Date", tournament: "Tournament", place: "Place", points: "Pts", average: "Avg", t180: "180s" },
+    recent: "Recent matches",
+    headToHead: "Head-to-head",
+    h2hColumns: { opponent: "Opponent", record: "W–L" },
+    won: "Won",
+    lost: "Lost",
+    stage: { group: "Groups", ko: "Knockout", third: "Third place" },
+    manual: "leg score only",
+    none: "Nothing yet.",
   },
 
   settings: {
@@ -357,7 +445,7 @@ export const copy = {
     confirmDelete: "Delete permanently",
     deleteWarning: "This removes the tournament with all its matches and scores. It can't be undone.",
     working: "Working…",
-    tabs: { groups: "Groups", bracket: "Bracket", matches: "Matches" },
+    tabs: { groups: "Groups", bracket: "Bracket", matches: "Matches", stats: "Stats", results: "Results" },
     tabsLabel: "Tournament sections",
     groupName: (i: number) => `Group ${String.fromCharCode(65 + i)}`,
     table: {
@@ -413,7 +501,50 @@ export const copy = {
       nextMatchStarted: "The next match has already started, so this winner can't change.",
       invalidScore: "Enter a finished score: one player must reach the winning number of legs.",
       notEditable: "This match's result can't be entered here.",
+      alreadyFinished: "The tournament is already finished.",
+      already_finished: "The tournament is already finished.",
+      matchesUnfinished: "Finish every match first, including live ones.",
+      matches_unfinished: "Finish every match first, including live ones.",
+      knockoutMissing: "Start the knockout and finish it first.",
+      knockout_missing: "Start the knockout and finish it first.",
+      not_finished: "Only a finished tournament can be recalculated.",
+      results_incomplete: "Not every player could be placed. Check that all matches have a winner.",
     },
+    finish: "Finish tournament",
+    finishHint: "Every match is done. Finishing freezes places and points and recalculates Elo.",
+    recalculate: "Recalculate results",
+    recalculateHint:
+      "Re-freezes places and points with the current points table and recalculates Elo. Use it after changing settings.",
+    recalculated: "Results recalculated.",
+    deleteFinishedWarning:
+      "This removes the tournament with all its matches, scores and results, and recalculates Elo without it. It can't be undone.",
+    statsEmpty: "Stats appear once matches are scored visit by visit on a board.",
+    leaders: "Leaders",
+    leaderLabels: {
+      average: "Best average",
+      t180: "Most 180s",
+      highestCheckout: "Highest checkout",
+      bestLeg: "Best leg",
+    },
+    statsColumns: {
+      player: "Player",
+      average: "Avg",
+      first9: "First 9",
+      t180: "180",
+      t140: "140+",
+      t100: "100+",
+      highestCheckout: "High CO",
+      checkoutPercent: "CO %",
+      bestLeg: "Best leg",
+      averageLong: "3-dart average",
+      first9Long: "First-9 average",
+      highestCheckoutLong: "Highest checkout",
+      checkoutPercentLong: "Checkout percentage",
+      bestLegLong: "Fewest darts in a won leg",
+    },
+    resultsPending: "Places and points appear here once the tournament is finished.",
+    resultsColumns: { place: "Place", player: "Player", points: "Points", elo: "Elo" },
+    dartsCount: (n: number) => `${n} darts`,
   },
 
   notFound: {
@@ -477,6 +608,16 @@ export function matchLabel(
 /** 3-dart average for display: one decimal, "–" without darts. */
 export function formatAverage(avg: number | null): string {
   return avg === null ? "–" : avg.toFixed(1);
+}
+
+/** Elo change for display: "+16", "−4", "0". */
+export function formatEloChange(change: number): string {
+  const r = Math.round(change);
+  return r > 0 ? `+${r}` : r < 0 ? `−${Math.abs(r)}` : "0";
+}
+
+export function formatPercent(p: number | null): string {
+  return p === null ? "–" : `${p.toFixed(1)}%`;
 }
 
 /** Elo for display: whole number. */

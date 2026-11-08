@@ -12,6 +12,8 @@ import {
   type SlotUpdate,
 } from "./bracket";
 import { manualResultWinner } from "./match";
+import { groupsKnockoutPlaces, knockoutPlaces, roundRobinPlaces, type Placement } from "./placements";
+import { pointsForPlace, type PointsRow } from "./points";
 import {
   groupStandings,
   orderEntrants,
@@ -436,6 +438,58 @@ export function tournamentOverview(t: OverviewInput): TournamentOverview {
     bracket: bracketColumns(t.matches, t.ko?.rounds ?? 0),
     buckets: matchBuckets(t.matches),
   };
+}
+
+// ---------------------------------------------------------------
+// Finishing (SPEC 4.9)
+// ---------------------------------------------------------------
+
+export type FinishBlocker = "alreadyFinished" | "matchesUnfinished" | "knockoutMissing";
+
+/** Why the tournament can't be finished yet, or null when it can. */
+export function finishBlocker(
+  format: Format,
+  status: TournamentStatus,
+  matches: readonly MatchRow[],
+): FinishBlocker | null {
+  if (status === "done") return "alreadyFinished";
+  if (format === "groups_ko" && status !== "ko") return "knockoutMissing";
+  if (matches.length === 0 || matches.some((m) => !m.isBye && m.status !== "done")) return "matchesUnfinished";
+  return null;
+}
+
+export type ResultRow = { playerId: string; place: number; points: number };
+
+/**
+ * Final places for every entrant (round robin: table; knockout: bracket; groups + knockout:
+ * bracket, then group-eliminated players by group position) with points from the table.
+ */
+export function finalResults(
+  t: {
+    format: Format;
+    groupCount: number;
+    advance: number;
+    ko: KoMeta | null;
+    entrants: readonly EntrantRow[];
+    matches: readonly MatchRow[];
+    averages?: Readonly<Record<string, number | null>>;
+  },
+  pointsTable: readonly PointsRow[],
+): ResultRow[] {
+  const averages = new Map(Object.entries(t.averages ?? {}));
+  const ko = t.matches.filter((m) => m.stage !== "group").map(toKoMatch);
+  const rounds = t.ko?.rounds ?? 0;
+  let places: Placement[];
+  if (t.format === "rr") {
+    places = roundRobinPlaces(groupTables(t.entrants, t.matches, 1, averages)[0] ?? []);
+  } else if (t.format === "ko") {
+    places = knockoutPlaces(ko, rounds);
+  } else {
+    places = groupsKnockoutPlaces(groupTables(t.entrants, t.matches, t.groupCount, averages), t.advance, ko, rounds);
+  }
+  return places
+    .map((p) => ({ playerId: p.playerId, place: p.place, points: pointsForPlace(p.place, pointsTable) }))
+    .sort((a, b) => a.place - b.place);
 }
 
 // ---------------------------------------------------------------

@@ -8,6 +8,8 @@ import type { Seeding } from "@/lib/domain/groups";
 import {
   canRedrawGroups,
   canStartKnockout,
+  finalResults,
+  finishBlocker,
   groupTables,
   normalizeStructure,
   parseTournamentInput,
@@ -17,6 +19,8 @@ import {
   validateTournamentInput,
 } from "@/lib/domain/tournament";
 import { NotOrganizerError, requireOrganizer } from "@/lib/supabase/auth";
+import { getSettings } from "@/lib/supabase/queries";
+import { eloPayload } from "@/lib/supabase/ranking";
 import { createClient } from "@/lib/supabase/server";
 import {
   getElos,
@@ -191,14 +195,60 @@ export async function setMatchResult(
   }
 }
 
-/** Deletes a tournament; matches, visits and entries cascade. */
+/**
+ * Freezes places and points and recalculates Elo (SPEC 4.9). `finish` = false re-freezes a
+ * finished tournament ("Recalculate results"), e.g. after the points table or Elo settings change.
+ */
+async function saveResults(tournamentId: string, finish: boolean): Promise<TournamentActionState> {
+  try {
+    await requireOrganizer();
+    if (!UUID_RE.test(tournamentId)) return fail("not_found");
+    const [t, settings] = await Promise.all([getTournament(tournamentId), getSettings()]);
+    if (!t) return fail("not_found");
+    if (finish) {
+      const blocker = finishBlocker(t.format, t.status, t.matches);
+      if (blocker) return fail(blocker);
+    } else if (t.status !== "done") {
+      return fail("not_finished");
+    }
+
+    const results = finalResults(t, settings.points);
+    if (results.length !== t.entrants.length) return fail("results_incomplete");
+
+    const supabase = await createClient();
+    const elo = await eloPayload(supabase, { k: settings.eloK, start: settings.eloStart }, { include: t.id });
+    const { error } = await supabase.rpc("save_results", {
+      p_tournament: t.id,
+      p_finish: finish,
+      p_results: results.map((r) => ({ player_id: r.playerId, place: r.place, points: r.points })),
+      p_elo: elo,
+    });
+    if (error) return rpcFailure(error);
+    refresh();
+    return { ok: true, message: null };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function finishTournament(tournamentId: string): Promise<TournamentActionState> {
+  return saveResults(tournamentId, true);
+}
+
+export async function recalculateResults(tournamentId: string): Promise<TournamentActionState> {
+  return saveResults(tournamentId, false);
+}
+
+/** Deletes a tournament (matches, visits, results cascade); Elo is recomputed without it. */
 export async function deleteTournament(tournamentId: string): Promise<TournamentActionState> {
   try {
     await requireOrganizer();
     if (!UUID_RE.test(tournamentId)) return fail("not_found");
+    const settings = await getSettings();
     const supabase = await createClient();
-    const { error } = await supabase.from("tournaments").delete().eq("id", tournamentId);
-    if (error) return { ok: false, message: copy.common.genericError };
+    const elo = await eloPayload(supabase, { k: settings.eloK, start: settings.eloStart }, { exclude: tournamentId });
+    const { error } = await supabase.rpc("delete_tournament", { p_tournament: tournamentId, p_elo: elo });
+    if (error) return rpcFailure(error);
   } catch (error) {
     return failure(error);
   }

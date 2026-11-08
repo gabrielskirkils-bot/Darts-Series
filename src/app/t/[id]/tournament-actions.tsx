@@ -1,38 +1,82 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { alertError, btnDanger, btnPrimary, btnSecondary, card } from "@/components/ui";
+import { alertError, alertOk, btnDanger, btnPrimary, btnSecondary, card } from "@/components/ui";
 import { copy } from "@/lib/copy";
 import type { Seeding } from "@/lib/domain/groups";
-import { deleteTournament, redrawGroups, startKnockout, type TournamentActionState } from "@/app/tournaments/actions";
+import {
+  deleteTournament,
+  finishTournament,
+  recalculateResults,
+  redrawGroups,
+  startKnockout,
+  type TournamentActionState,
+} from "@/app/tournaments/actions";
 
 /** Organizer actions: start knockout, redraw groups, delete (with confirmation). */
 export function TournamentActions({
   tournamentId,
   canRedraw,
   canStartKnockout,
+  canFinish,
+  finished,
   seeding,
 }: {
   tournamentId: string;
   canRedraw: boolean;
   canStartKnockout: boolean;
+  canFinish: boolean;
+  finished: boolean;
   seeding: Seeding;
 }) {
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState<"redraw" | "delete" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  function run(fn: () => Promise<TournamentActionState>) {
+  function run(fn: () => Promise<TournamentActionState>, success: string | null = null) {
     setError(null);
+    setNotice(null);
     startTransition(async () => {
       const result = await fn();
       if (result && !result.ok) setError(result.message);
-      else setConfirming(null);
+      else {
+        setConfirming(null);
+        setNotice(success);
+      }
     });
   }
 
   return (
     <section className={`${card} space-y-3`}>
+      {canFinish && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            className={`${btnPrimary} min-h-14 text-lg`}
+            disabled={pending}
+            onClick={() => run(() => finishTournament(tournamentId))}
+          >
+            {pending ? copy.tournament.working : copy.tournament.finish}
+          </button>
+          <p className="text-sm text-muted">{copy.tournament.finishHint}</p>
+        </div>
+      )}
+
+      {finished && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            className={btnSecondary}
+            disabled={pending}
+            onClick={() => run(() => recalculateResults(tournamentId), copy.tournament.recalculated)}
+          >
+            {pending ? copy.tournament.working : copy.tournament.recalculate}
+          </button>
+          <p className="text-sm text-muted">{copy.tournament.recalculateHint}</p>
+        </div>
+      )}
+
       {canStartKnockout && (
         <div className="space-y-2">
           <button
@@ -101,7 +145,12 @@ export function TournamentActions({
       {confirming === "redraw" && <p className="text-sm text-muted">{copy.tournament.redrawHint}</p>}
       {confirming === "delete" && (
         <p className="text-sm text-board-red" role="alert">
-          {copy.tournament.deleteWarning}
+          {finished ? copy.tournament.deleteFinishedWarning : copy.tournament.deleteWarning}
+        </p>
+      )}
+      {notice && (
+        <p className={alertOk} role="status">
+          {notice}
         </p>
       )}
       {error && (

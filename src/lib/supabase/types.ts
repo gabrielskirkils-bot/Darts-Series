@@ -546,6 +546,10 @@ export type Database = {
         Returns: string
       }
       create_tournament: { Args: { p: Json }; Returns: string }
+      delete_tournament: {
+        Args: { p_elo: Json; p_tournament: string }
+        Returns: undefined
+      }
       is_organizer: { Args: never; Returns: boolean }
       record_visit: {
         Args: {
@@ -564,6 +568,15 @@ export type Database = {
       }
       redraw_groups: {
         Args: { p: Json; p_tournament: string }
+        Returns: undefined
+      }
+      save_results: {
+        Args: {
+          p_elo: Json
+          p_finish: boolean
+          p_results: Json
+          p_tournament: string
+        }
         Returns: undefined
       }
       start_knockout: {
