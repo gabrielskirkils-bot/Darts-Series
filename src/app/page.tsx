@@ -14,10 +14,8 @@ export default function HomePage() {
 }
 
 async function Overview() {
-  let overview;
-  try {
-    overview = await getOverview();
-  } catch {
+  const overview = await getOverview().catch(() => null);
+  if (!overview) {
     return <p className="rounded-lg border border-board-red/50 p-4 text-cream">{copy.home.loadError}</p>;
   }
 

@@ -51,6 +51,13 @@ export type Database = {
             foreignKeyName: "elo_history_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elo_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -167,7 +174,21 @@ export type Database = {
             foreignKeyName: "matches_p1_fkey"
             columns: ["p1"]
             isOneToOne: false
+            referencedRelation: "player_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_p1_fkey"
+            columns: ["p1"]
+            isOneToOne: false
             referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_p2_fkey"
+            columns: ["p2"]
+            isOneToOne: false
+            referencedRelation: "player_summary"
             referencedColumns: ["id"]
           },
           {
@@ -182,6 +203,13 @@ export type Database = {
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "player_summary"
             referencedColumns: ["id"]
           },
           {
@@ -274,6 +302,13 @@ export type Database = {
             foreignKeyName: "tournament_players_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -306,6 +341,13 @@ export type Database = {
           tournament_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tournament_results_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_summary"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_results_player_id_fkey"
             columns: ["player_id"]
@@ -435,6 +477,20 @@ export type Database = {
       }
     }
     Views: {
+      player_summary: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          elo: number | null
+          has_entries: boolean | null
+          id: string | null
+          name: string | null
+          nickname: string | null
+          points: number | null
+          tournaments: number | null
+        }
+        Relationships: []
+      }
       player_tournament_record: {
         Row: {
           legs_lost: number | null
