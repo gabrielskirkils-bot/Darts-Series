@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* "At the oche": dark green-black, cream text, board red/green accents. */
+:root {
+  --oche-bg: #0c1410;
+  --oche-surface: #14201a;
+  --oche-surface-2: #1c2b23;
+  --oche-line: #2a3b31;
+  --oche-cream: #f3ead3;
+  --oche-muted: #a9a58f;
+  --oche-red: #d8433a;
+  --oche-green: #2f9e5b;
+  --oche-gold: #e0b44c;
+}
+
+@theme inline {
+  --color-bg: var(--oche-bg);
+  --color-surface: var(--oche-surface);
+  --color-surface-2: var(--oche-surface-2);
+  --color-line: var(--oche-line);
+  --color-cream: var(--oche-cream);
+  --color-muted: var(--oche-muted);
+  --color-board-red: var(--oche-red);
+  --color-board-green: var(--oche-green);
+  --color-gold: var(--oche-gold);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-condensed);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--oche-bg);
+  color: var(--oche-cream);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Condensed numerals for scores and tables. */
+.num {
+  font-family: var(--font-condensed), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--oche-gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
