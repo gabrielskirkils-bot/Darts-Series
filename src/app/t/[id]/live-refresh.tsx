@@ -28,9 +28,18 @@ export function LiveRefresh({ tournamentId }: { tournamentId: string }) {
         { event: "*", schema: "public", table: "tournaments", filter: `id=eq.${tournamentId}` },
         schedule,
       )
-      .subscribe();
+      // Changes made between the server render and (re)connecting would otherwise be missed.
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") schedule();
+      });
+    // A board tablet waking from sleep may have missed events while hidden.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") schedule();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
       void supabase.removeChannel(channel);
     };
   }, [tournamentId, router]);

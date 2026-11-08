@@ -12,6 +12,7 @@ import {
   parseKoMeta,
   parseTournamentInput,
   planDraw,
+  planConfirm,
   planKnockoutFromGroups,
   planManualResult,
   tournamentOverview,
@@ -357,6 +358,38 @@ describe("tournamentOverview", () => {
     expect(o.canRedraw).toBe(false);
     expect(o.bracket.columns.map((c) => c.length)).toEqual([4, 2, 1]);
     expect(o.progress).toEqual({ done: 0, total: 6 });
+  });
+});
+
+describe("planConfirm (SPEC 8.6)", () => {
+  const setup = () => rows(planDraw(entrants(4), config({ format: "ko", thirdPlace: true }), Math.random).matches);
+  const find = (ms: MatchRow[], stage: string, round: number, slot: number) =>
+    ms.find((m) => m.stage === stage && m.round === round && m.slot === slot)!;
+
+  it("after both semi-finals, the final and third-place match hold the right players", () => {
+    const ms = setup(); // semis: p1 v p4, p2 v p3
+    const s0 = find(ms, "ko", 1, 0);
+    const s1 = find(ms, "ko", 1, 1);
+    s0.status = "live";
+    const a = planConfirm(ms, s0.id, 1, 2)!; // p4 beats p1
+    expect(a.winnerId).toBe("p4");
+    expect(a.slots).toEqual([
+      { stage: "ko", round: 2, slot: 0, side: "p1", playerId: "p4" },
+      { stage: "third", round: 2, slot: 0, side: "p1", playerId: "p1" },
+    ]);
+    s1.status = "live";
+    const b = planConfirm(ms, s1.id, 0, 2)!; // p2 beats p3
+    expect(b.slots).toEqual([
+      { stage: "ko", round: 2, slot: 0, side: "p2", playerId: "p2" },
+      { stage: "third", round: 2, slot: 0, side: "p2", playerId: "p3" },
+    ]);
+  });
+
+  it("group matches don't advance; only live matches can be confirmed", () => {
+    const ms = rows(planDraw(entrants(4), config({ groupCount: 1 }), Math.random).matches);
+    expect(planConfirm(ms, ms[0]!.id, 0, null)).toBeNull();
+    ms[0]!.status = "live";
+    expect(planConfirm(ms, ms[0]!.id, 0, null)).toEqual({ winnerId: ms[0]!.p1, slots: [] });
   });
 });
 

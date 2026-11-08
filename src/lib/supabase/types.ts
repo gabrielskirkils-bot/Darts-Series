@@ -530,6 +530,7 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_match: { Args: { p_match: string }; Returns: undefined }
       apply_match_result: {
         Args: {
           p_legs_p1: number
@@ -540,14 +541,41 @@ export type Database = {
         }
         Returns: undefined
       }
+      confirm_match: {
+        Args: { p_match: string; p_slots: Json }
+        Returns: string
+      }
       create_tournament: { Args: { p: Json }; Returns: string }
       is_organizer: { Args: never; Returns: boolean }
+      record_visit: {
+        Args: {
+          p_bust: boolean
+          p_darts: number
+          p_darts_at_double: number
+          p_is_checkout: boolean
+          p_leg_no: number
+          p_match: string
+          p_player: number
+          p_score: number
+          p_seq: number
+          p_starter: number
+        }
+        Returns: undefined
+      }
       redraw_groups: {
         Args: { p: Json; p_tournament: string }
         Returns: undefined
       }
       start_knockout: {
         Args: { p: Json; p_tournament: string }
+        Returns: undefined
+      }
+      start_match: {
+        Args: { p_board: number; p_first: number; p_match: string }
+        Returns: undefined
+      }
+      undo_visit: {
+        Args: { p_leg_no: number; p_match: string; p_seq: number }
         Returns: undefined
       }
     }

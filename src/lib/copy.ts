@@ -1,6 +1,6 @@
 // All UI strings live here.
 
-import type { RoundName } from "@/lib/domain/bracket";
+import { roundName, type RoundName } from "@/lib/domain/bracket";
 import type { PlayerInputError, PlayerSortKey } from "@/lib/domain/players";
 import type { SettingsError } from "@/lib/domain/settings";
 import type { Format, MatchFormats, StageFormat, StructureError } from "@/lib/domain/structure";
@@ -164,7 +164,71 @@ export const copy = {
     dartsUsed: "Darts used this visit?",
     dartsAtDouble: "Darts at double?",
     undo: "Undo last visit",
+    undoShort: "Undo",
     confirmResult: "Confirm result",
+    confirming: "Confirming…",
+    toThrow: "to throw",
+    legs: "Legs",
+    average: "Avg",
+    darts: (n: number) => `${n} ${n === 1 ? "dart" : "darts"}`,
+    checkoutHint: "Checkout",
+    legInfo: (leg: number, bestOf: number, start: number) => `Leg ${leg} · Best of ${bestOf} · ${start}`,
+    scoreLabel: "Visit score",
+    enter: "Enter",
+    enterScore: (name: string) => `Score for ${name}`,
+    backspace: "Delete last digit",
+    keypad: "Score keypad",
+    quick: "Quick scores",
+    history: "This leg",
+    noVisits: "No visits in this leg yet.",
+    checkoutTitle: (score: number) => `Checkout ${score}`,
+    doublesTitle: (score: number) => `${score} scored`,
+    bustTitle: (score: number) => `Bust (${score})`,
+    bustEntry: (score: number) => `Bust (${score})`,
+    quickScores: [26, 41, 45, 60, 81, 85, 100, 140, 180],
+    cancel: "Cancel",
+    matchWon: (name: string) => `${name} wins`,
+    statLine: (avg: string, t180: number, best: number) =>
+      `Avg ${avg} · 180s ${t180}${best ? ` · Best checkout ${best}` : ""}`,
+    saveFailed: "Couldn't save. The scoreboard reloaded from the server; check the last visit.",
+    abandon: "Abandon match",
+    confirmAbandon: "Abandon and delete visits",
+    abandonWarning: "The match goes back to waiting and every visit entered is deleted.",
+    keyboardHint: "Keyboard: digits, Enter, Backspace, Ctrl+Z to undo.",
+  },
+
+  board: {
+    title: (n: number) => `Board ${n}`,
+    loginNeeded: "Board screens are for organizers. Log in with an organizer account.",
+    switchLabel: "Switch board",
+    tournament: "Tournament page",
+    nextMatch: "Next match",
+    otherWaiting: "Other waiting matches",
+    playHere: "Play here",
+    playersBusy: "A player is on another board",
+    noneReady: "No match is ready right now. Matches appear here when both players are free.",
+    allPlayed: "Every match has been played.",
+    tournamentDone: "This tournament is finished.",
+    whoStarts: "Who throws first? (bull-up winner)",
+    throwsFirst: (name: string) => `${name} throws first`,
+    starting: "Starting…",
+    errors: {
+      not_found: "Match not found.",
+      not_organizer: "Only organizers can do this. Log in with an organizer account.",
+      tournament_done: "The tournament is finished.",
+      groups_closed: "The group stage is over.",
+      match_not_pending: "This match has already started or finished.",
+      match_not_ready: "Both players must be known before the match can start.",
+      bad_board: "That board doesn't exist in this tournament.",
+      bad_starter: "Choose who throws first.",
+      board_busy: "Another match is already live on this board.",
+      player_busy: "One of the players is playing on another board.",
+      match_not_live: "This match isn't live any more.",
+      match_unfinished: "The match isn't finished yet.",
+      bad_winner: "The winner must be one of the two players.",
+      next_match_started: "The next match has already started, so the result can't be confirmed. Undo it there first.",
+      not_last: "Only the last visit can be undone.",
+    },
   },
 
   structureErrors: {
@@ -398,6 +462,21 @@ export function formatSummary(t: {
   if (t.rounds >= 2) parts.push(`${copy.settings.formats.stage.ko} ${stageText(t.fmt.ko)}`);
   if (t.rounds >= 1) parts.push(`${copy.settings.formats.stage.final} ${stageText(t.fmt.final)}`);
   return parts.join(" · ");
+}
+
+/** "Group B · Round 2", "Quarter-final", "Third-place match". */
+export function matchLabel(
+  m: { stage: "group" | "ko" | "third"; groupIndex: number | null; round: number },
+  rounds: number,
+): string {
+  if (m.stage === "group") return copy.tournament.groupRound(copy.tournament.groupName(m.groupIndex ?? 0), m.round);
+  if (m.stage === "third") return copy.thirdPlace;
+  return roundLabel(roundName(m.round, rounds));
+}
+
+/** 3-dart average for display: one decimal, "–" without darts. */
+export function formatAverage(avg: number | null): string {
+  return avg === null ? "–" : avg.toFixed(1);
 }
 
 /** Elo for display: whole number. */

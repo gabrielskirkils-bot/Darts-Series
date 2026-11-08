@@ -58,4 +58,28 @@ test.describe("RLS for anonymous users", () => {
     });
     expect(result.error).not.toBeNull();
   });
+
+  test("cannot call the scoreboard write functions", async () => {
+    const db = anon();
+    const nil = "00000000-0000-0000-0000-000000000000";
+    const calls = await Promise.all([
+      db.rpc("start_match", { p_match: nil, p_board: 1, p_first: 0 }),
+      db.rpc("record_visit", {
+        p_match: nil,
+        p_leg_no: 1,
+        p_seq: 1,
+        p_player: 0,
+        p_score: 60,
+        p_darts: 3,
+        p_darts_at_double: 0,
+        p_bust: false,
+        p_is_checkout: false,
+        p_starter: 0,
+      }),
+      db.rpc("undo_visit", { p_match: nil, p_leg_no: 1, p_seq: 1 }),
+      db.rpc("confirm_match", { p_match: nil, p_slots: [] }),
+      db.rpc("abandon_match", { p_match: nil }),
+    ]);
+    for (const call of calls) expect(call.error).not.toBeNull();
+  });
 });

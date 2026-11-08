@@ -3,6 +3,7 @@
 
 import { minCheckoutDarts } from "./checkout";
 import { classifyVisit, legStarter, legsToWin, shouldAskDartsAtDouble } from "./rules";
+import { threeDartAverage, visitTotals } from "./stats";
 
 export type Side = 0 | 1;
 
@@ -185,6 +186,70 @@ export function manualResultWinner(bestOf: number, legsP1: number, legsP2: numbe
   if (legsP1 === need && legsP2 < need) return 0;
   if (legsP2 === need && legsP1 < need) return 1;
   return null;
+}
+
+// ---------------------------------------------------------------
+// Scoreboard views
+// ---------------------------------------------------------------
+
+export type HistoryRow = Visit & { remainingAfter: number };
+
+/** Visits of the leg in play with each player's score left after the visit. */
+export function legHistory(setup: MatchSetup, state: MatchState): HistoryRow[] {
+  const left: [number, number] = [setup.startScore, setup.startScore];
+  return state.currentLeg.visits.map((v) => {
+    if (!v.bust) left[v.player] -= v.score;
+    return { ...v, remainingAfter: left[v.player] };
+  });
+}
+
+export type SideSummary = {
+  average: number | null;
+  t180: number;
+  highestCheckout: number;
+  checkouts: number;
+  dartsAtDouble: number;
+};
+
+/** Per-player match line for the scoreboard and the match-end overlay. */
+export function matchSummary(visits: readonly Visit[]): [SideSummary, SideSummary] {
+  const side = (player: Side): SideSummary => {
+    const t = visitTotals(visits.filter((v) => v.player === player).map((v) => ({ ...v, matchId: "" })));
+    return {
+      average: threeDartAverage(t.points, t.darts),
+      t180: t.t180,
+      highestCheckout: t.highestCheckout,
+      checkouts: t.checkouts,
+      dartsAtDouble: t.dartsAtDouble,
+    };
+  };
+  return [side(0), side(1)];
+}
+
+// ---------------------------------------------------------------
+// Optimistic writes: saved visits from the server + this device's unsent operations
+// ---------------------------------------------------------------
+
+export type PendingOp = { kind: "add"; visit: Visit } | { kind: "undo"; legNo: number; seq: number };
+
+const sameKey = (a: { legNo: number; seq: number }, b: { legNo: number; seq: number }) =>
+  a.legNo === b.legNo && a.seq === b.seq;
+
+/**
+ * What the scoreboard shows: the server's visits with pending operations replayed in order.
+ * Idempotent: an add already on the server isn't doubled, an undo already applied removes nothing.
+ */
+export function mergeVisits(server: readonly Visit[], ops: readonly PendingOp[]): Visit[] {
+  const list = [...server];
+  for (const op of ops) {
+    if (op.kind === "add") {
+      if (!list.some((v) => sameKey(v, op.visit))) list.push(op.visit);
+    } else {
+      const i = list.findIndex((v) => sameKey(v, op));
+      if (i >= 0) list.splice(i, 1);
+    }
+  }
+  return list.sort((a, b) => a.legNo - b.legNo || a.seq - b.seq);
 }
 
 /** The visit that undo deletes (the most recent one), or null if none. */

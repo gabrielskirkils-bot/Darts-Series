@@ -2,6 +2,7 @@
 // Pure: randomness comes in as an Rng, the caller writes the plan in one transaction.
 
 import {
+  advanceWinner,
   editKnockoutWinner,
   generateKnockout,
   seedsFromGroups,
@@ -435,6 +436,29 @@ export function tournamentOverview(t: OverviewInput): TournamentOverview {
     bracket: bracketColumns(t.matches, t.ko?.rounds ?? 0),
     buckets: matchBuckets(t.matches),
   };
+}
+
+// ---------------------------------------------------------------
+// Confirming a scored match (SPEC 4.7 step 6)
+// ---------------------------------------------------------------
+
+/**
+ * Where a confirmed live match sends its players: the winner to the next round, a
+ * semi-final loser to the third-place match (if there is one). Group matches go nowhere.
+ */
+export function planConfirm(
+  matches: readonly MatchRow[],
+  matchId: string,
+  winnerSide: 0 | 1,
+  rounds: number | null,
+): { winnerId: string; slots: SlotUpdate[] } | null {
+  const match = matches.find((m) => m.id === matchId);
+  if (!match || match.status !== "live" || !match.p1 || !match.p2) return null;
+  const winnerId = winnerSide === 0 ? match.p1 : match.p2;
+  const loserId = winnerSide === 0 ? match.p2 : match.p1;
+  if (match.stage === "group" || rounds === null) return { winnerId, slots: [] };
+  const hasThird = matches.some((m) => m.stage === "third");
+  return { winnerId, slots: advanceWinner(toKoMatch(match), winnerId, loserId, rounds, hasThird) };
 }
 
 // ---------------------------------------------------------------

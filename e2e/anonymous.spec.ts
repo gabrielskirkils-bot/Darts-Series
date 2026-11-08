@@ -53,6 +53,12 @@ test("the wizard asks anonymous users to log in", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Create tournament" })).toHaveCount(0);
 });
 
+test("board screens ask anonymous users to log in", async ({ page }) => {
+  await page.goto("/t/00000000-0000-0000-0000-000000000000/board/1");
+  await expect(page.getByText("Board screens are for organizers")).toBeVisible();
+  await expect(page.getByRole("group", { name: "Score keypad" })).toHaveCount(0);
+});
+
 test("an unknown tournament shows not found", async ({ page }) => {
   await page.goto("/t/00000000-0000-0000-0000-000000000000");
   await expect(page.getByRole("heading", { name: "Not found" })).toBeVisible();

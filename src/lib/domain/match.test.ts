@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildVisit,
   lastVisit,
+  legHistory,
   manualResultWinner,
   matchState,
+  matchSummary,
+  mergeVisits,
   planVisit,
   type MatchSetup,
   type Visit,
@@ -135,6 +138,59 @@ describe("planVisit", () => {
     const st = matchState(setup, play(setup, [100, 0, 100, 0])); // p1 on 101
     expect(st.remaining[0]).toBe(101);
     expect(planVisit(st, 101, true)).toEqual({ kind: "checkout", minDarts: 2 });
+  });
+});
+
+describe("legHistory / matchSummary", () => {
+  it("lists the leg in play with the score left after each visit", () => {
+    const visits = play(setup, [100, 60, 180, 26]); // p1: 201 → 21 (bust check: 180 ok)
+    const rows = legHistory(setup, matchState(setup, visits));
+    expect(rows.map((r) => [r.player, r.score, r.remainingAfter])).toEqual([
+      [0, 100, 201],
+      [1, 60, 241],
+      [0, 180, 21],
+      [1, 26, 215],
+    ]);
+  });
+
+  it("a bust keeps the score; a new leg starts an empty history", () => {
+    const visits = play(setup, [140, 100, 140, 100, 20]); // p1 on 21, 20 → bust
+    const rows = legHistory(setup, matchState(setup, visits));
+    expect(rows.at(-1)).toMatchObject({ bust: true, remainingAfter: 21 });
+    const won = play(setup, [180, 100, { score: 121, darts: 3, dartsAtDouble: 1 }]);
+    expect(legHistory(setup, matchState(setup, won))).toEqual([]);
+  });
+
+  it("summarises average, 180s and checkouts per player", () => {
+    const visits = play(setup, [180, 100, { score: 121, darts: 3, dartsAtDouble: 1 }]);
+    const [a, b] = matchSummary(visits);
+    expect(a).toEqual({ average: (301 / 6) * 3, t180: 1, highestCheckout: 121, checkouts: 1, dartsAtDouble: 1 });
+    expect(b).toEqual({ average: 100, t180: 0, highestCheckout: 0, checkouts: 0, dartsAtDouble: 0 });
+    expect(matchSummary([])[0].average).toBeNull();
+  });
+});
+
+describe("mergeVisits (optimistic writes)", () => {
+  const visits = play(setup, [100, 60, 41]);
+  const [v1, v2, v3] = visits as [Visit, Visit, Visit];
+
+  it("adds unsent visits without doubling ones the server already has", () => {
+    expect(mergeVisits([v1], [{ kind: "add", visit: v2 }])).toEqual([v1, v2]);
+    expect(mergeVisits([v1, v2], [{ kind: "add", visit: v2 }])).toEqual([v1, v2]);
+  });
+
+  it("an undo removes its own visit once, even if replayed", () => {
+    const undo = { kind: "undo" as const, legNo: v3.legNo, seq: v3.seq };
+    expect(mergeVisits(visits, [undo])).toEqual([v1, v2]);
+    expect(mergeVisits([v1, v2], [undo])).toEqual([v1, v2]);
+  });
+
+  it("replays add then undo in order and sorts the result", () => {
+    const ops = [
+      { kind: "add" as const, visit: v3 },
+      { kind: "undo" as const, legNo: v3.legNo, seq: v3.seq },
+    ];
+    expect(mergeVisits([v2, v1], ops)).toEqual([v1, v2]);
   });
 });
 

@@ -2,18 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { alertError, btnGhost, btnPrimary, btnSecondary } from "@/components/ui";
-import { copy, roundLabel } from "@/lib/copy";
-import { roundName } from "@/lib/domain/bracket";
+import { copy } from "@/lib/copy";
 import { manualResultWinner } from "@/lib/domain/match";
 import { legsToWin } from "@/lib/domain/rules";
 import { canEnterResult, type MatchRow, type TournamentStatus } from "@/lib/domain/tournament";
 import { setMatchResult } from "@/app/tournaments/actions";
-
-export function matchLabel(m: MatchRow, rounds: number): string {
-  if (m.stage === "group") return copy.tournament.groupRound(copy.tournament.groupName(m.groupIndex ?? 0), m.round);
-  if (m.stage === "third") return copy.thirdPlace;
-  return roundLabel(roundName(m.round, rounds));
-}
 
 /** One match: players, leg score, state; organizers can enter a fallback leg score. */
 export function MatchCard({

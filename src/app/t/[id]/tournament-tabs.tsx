@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { copy, roundLabel } from "@/lib/copy";
+import { copy, matchLabel, roundLabel } from "@/lib/copy";
 import { roundName } from "@/lib/domain/bracket";
 import type { StandingRow } from "@/lib/domain/groups";
 import type { Format } from "@/lib/domain/structure";
 import type { MatchRow, TournamentOverview, TournamentStatus } from "@/lib/domain/tournament";
-import { MatchCard, matchLabel } from "./match-card";
+import { MatchCard } from "./match-card";
 
 type Tab = "groups" | "bracket" | "matches";
 
