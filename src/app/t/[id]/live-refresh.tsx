@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+/** Hidden for at least this long before becoming visible again → refresh (may have missed events). */
+const MISSED_AFTER_MS = 15_000;
+
 /** Re-renders the page from the server when this tournament's matches or status change. */
 export function LiveRefresh({ tournamentId }: { tournamentId: string }) {
   const router = useRouter();
@@ -32,14 +35,21 @@ export function LiveRefresh({ tournamentId }: { tournamentId: string }) {
       .subscribe((status) => {
         if (status === "SUBSCRIBED") schedule();
       });
-    // A board tablet waking from sleep may have missed events while hidden.
-    const onVisible = () => {
-      if (document.visibilityState === "visible") schedule();
+    // A board tablet waking from sleep may have missed events while hidden. Brief flips
+    // (some embedded browsers toggle visibility every few seconds) don't need a refresh.
+    let hiddenSince: number | null = document.visibilityState === "hidden" ? Date.now() : null;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenSince = Date.now();
+        return;
+      }
+      if (hiddenSince !== null && Date.now() - hiddenSince >= MISSED_AFTER_MS) schedule();
+      hiddenSince = null;
     };
-    document.addEventListener("visibilitychange", onVisible);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVisible);
+      document.removeEventListener("visibilitychange", onVisibility);
       void supabase.removeChannel(channel);
     };
   }, [tournamentId, router]);

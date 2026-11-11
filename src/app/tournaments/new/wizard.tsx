@@ -159,7 +159,7 @@ export function TournamentWizard({ players, defaults }: { players: WizardPlayer[
             <label className="flex min-h-11 cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
-                className="size-5 accent-board-green"
+                className="size-5 accent-gold"
                 checked={structure.thirdPlace}
                 onChange={(e) => editStructure({ thirdPlace: e.target.checked })}
               />
@@ -416,8 +416,8 @@ function PlayerPicker({
                   onClick={() => onToggle(p.id)}
                   className={`min-h-11 rounded-full border px-4 text-left font-medium transition-colors ${
                     on
-                      ? "border-board-green bg-board-green/20 text-cream"
-                      : "border-line bg-surface-2 text-muted hover:text-cream"
+                      ? "border-gold bg-gold/15 text-ink"
+                      : "border-line bg-surface-2 text-muted hover:text-ink"
                   }`}
                 >
                   <span aria-hidden>{on ? "✓ " : ""}</span>

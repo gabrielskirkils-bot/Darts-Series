@@ -285,7 +285,7 @@ export function Scoreboard({
             </button>
             <button
               type="button"
-              className={`${key} border-board-green bg-board-green text-xl text-cream active:bg-board-green/80`}
+              className={`${key} border-gold bg-gold text-xl text-bg active:bg-gold/80`}
               disabled={over || entry === ""}
               onClick={enter}
             >
@@ -303,7 +303,7 @@ export function Scoreboard({
       <div className="space-y-2 border-t border-line pt-3">
         {abandoning ? (
           <div className="space-y-2">
-            <p className="text-sm text-board-red">{copy.scoring.abandonWarning}</p>
+            <p className="text-sm text-alert">{copy.scoring.abandonWarning}</p>
             <div className="flex flex-wrap gap-2">
               <button type="button" className={btnDanger} disabled={busy} onClick={abandon}>
                 {copy.scoring.confirmAbandon}
@@ -382,7 +382,7 @@ function PlayerPanel({
       <div className="flex items-start justify-between gap-2">
         <h2 className="truncate text-base font-semibold sm:text-xl">
           {starter && (
-            <span className="mr-1 text-board-red" aria-hidden>
+            <span className="mr-1 text-alert" aria-hidden>
               ●
             </span>
           )}
@@ -395,10 +395,10 @@ function PlayerPanel({
       {active && <span className="text-xs font-semibold tracking-wide text-gold uppercase">{copy.scoring.toThrow}</span>}
       <p className="num my-1 text-6xl leading-none font-bold sm:text-7xl lg:text-8xl">{remaining}</p>
       <p className="text-xs text-muted sm:text-sm">
-        {copy.scoring.average} <span className="num text-cream">{formatAverage(summary.average)}</span> ·{" "}
+        {copy.scoring.average} <span className="num text-ink">{formatAverage(summary.average)}</span> ·{" "}
         {copy.scoring.darts(darts)}
       </p>
-      <p className="num mt-1 min-h-6 text-sm font-semibold text-board-green sm:text-base">
+      <p className="num mt-1 min-h-6 text-sm font-semibold text-win sm:text-base">
         {route && (
           <>
             <span className="sr-only">{copy.scoring.checkoutHint}: </span>
@@ -426,7 +426,7 @@ function History({ rows, players }: { rows: HistoryRow[]; players: [string, stri
                 .filter((r) => r.player === side)
                 .map((r) => (
                   <li key={`${r.legNo}-${r.seq}`} className="num flex justify-between text-lg">
-                    <span className={r.bust ? "text-board-red" : r.isCheckout ? "text-board-green" : ""}>
+                    <span className={r.bust ? "text-alert" : r.isCheckout ? "text-win" : ""}>
                       {r.bust ? copy.scoring.bustEntry(r.score) : r.score}
                     </span>
                     <span className="text-muted">{r.remainingAfter}</span>
@@ -478,7 +478,7 @@ function MatchOver({
         <ul className="space-y-1 text-sm text-muted">
           {([0, 1] as const).map((side) => (
             <li key={side}>
-              <span className="font-semibold text-cream">{players[side]}</span> ·{" "}
+              <span className="font-semibold text-ink">{players[side]}</span> ·{" "}
               {copy.scoring.statLine(
                 formatAverage(summary[side].average),
                 summary[side].t180,
@@ -499,7 +499,7 @@ function MatchOver({
           <button
             ref={confirmRef}
             type="button"
-            className="inline-flex min-h-14 items-center justify-center rounded-lg bg-board-green px-4 text-lg font-semibold text-cream hover:bg-board-green/85 disabled:opacity-50"
+            className="inline-flex min-h-14 items-center justify-center rounded-lg bg-gold px-4 text-lg font-bold text-bg hover:bg-gold/90 disabled:opacity-50"
             disabled={busy}
             onClick={onConfirm}
           >

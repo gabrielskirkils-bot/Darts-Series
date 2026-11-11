@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Crest } from "@/components/crest";
 import { alertError, alertOk, alertWarn, card } from "@/components/ui";
 import { copy } from "@/lib/copy";
 import { getViewer } from "@/lib/supabase/auth";
@@ -11,8 +12,11 @@ export const metadata: Metadata = { title: copy.login.title };
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="mx-auto max-w-md space-y-4">
-      <h1 className="font-display text-3xl font-bold uppercase">{copy.login.title}</h1>
-      <p className="text-muted">{copy.login.intro}</p>
+      <div className="flex flex-col items-center gap-3 pt-2 text-center">
+        <Crest height={176} sizeClass="h-36 w-auto sm:h-44" priority />
+        <h1 className="font-display text-3xl uppercase">{copy.login.title}</h1>
+        <p className="text-muted">{copy.login.intro}</p>
+      </div>
       <Suspense fallback={<p className="text-muted">{copy.common.loading}</p>}>
         <LoginContent searchParams={searchParams} />
       </Suspense>

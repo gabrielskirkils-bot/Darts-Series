@@ -84,7 +84,7 @@ export function TournamentTabs({
             tabIndex={tab === t ? 0 : -1}
             onClick={() => setTab(t)}
             className={`-mb-px min-h-12 shrink-0 border-b-2 px-3 font-semibold sm:flex-none sm:px-4 ${
-              tab === t ? "border-gold text-cream" : "border-transparent text-muted hover:text-cream"
+              tab === t ? "border-gold text-ink" : "border-transparent text-muted hover:text-ink"
             }`}
           >
             {copy.tournament.tabs[t]}
@@ -219,7 +219,7 @@ function ResultsPanel({
                 <td className="num px-3 text-right text-lg">{r.points}</td>
                 <td
                   className={`num px-3 text-right text-lg ${
-                    change === undefined ? "text-muted" : change >= 0 ? "text-board-green" : "text-board-red"
+                    change === undefined ? "text-muted" : change >= 0 ? "text-win" : "text-alert"
                   }`}
                 >
                   {change === undefined ? "–" : formatEloChange(change)}
@@ -307,9 +307,9 @@ function GroupTable({
           {rows.map((r) => {
             const q = r.position <= qualifiers;
             return (
-              <tr key={r.playerId} className={q ? "bg-board-green/10" : undefined}>
+              <tr key={r.playerId} className={q ? "bg-win/10" : undefined}>
                 <td
-                  className={`num border-l-4 px-2 py-2 text-center text-lg ${q ? "border-board-green" : "border-transparent"}`}
+                  className={`num border-l-4 px-2 py-2 text-center text-lg ${q ? "border-win" : "border-transparent"}`}
                 >
                   {r.position}
                   {q && <span className="sr-only"> ({copy.tournament.qualifies})</span>}

@@ -1,32 +1,41 @@
 @import "tailwindcss";
 
-/* "At the oche": dark green-black, cream text, board red/green accents. */
+/*
+ * SAL · Superamatieru Līga. Colours from the crest (navy #002250, red #bc0210, beer gold
+ * #e7a504), tuned for a dark navy UI. Every text pair is ≥ 4.5:1 (alert on surface 5.7:1).
+ */
 :root {
-  --oche-bg: #0c1410;
-  --oche-surface: #14201a;
-  --oche-surface-2: #1c2b23;
-  --oche-line: #2a3b31;
-  --oche-cream: #f3ead3;
-  --oche-muted: #a9a58f;
-  --oche-red: #d8433a;
-  --oche-green: #2f9e5b;
-  --oche-gold: #e0b44c;
-  --oche-bronze: #c98a4b;
+  --sal-bg: #081530;
+  --sal-surface: #0f2147;
+  --sal-surface-2: #17305f;
+  --sal-line: #263f74;
+  --sal-ink: #f4f6fb;
+  --sal-muted: #a6b2cd;
+  --sal-navy: #002250; /* the crest's navy, for brand accents */
+  --sal-blue: #2c5bc4; /* the crest's navy, lifted so it shows on the navy UI */
+  --sal-red: #c8102e; /* the crest's red, for fills (live, danger, brand stripe) */
+  --sal-alert: #ff6b78; /* red for text on navy (busts, errors, Elo losses) */
+  --sal-green: #3fd17f; /* wins and checkouts only */
+  --sal-gold: #f2b01e; /* beer gold: highlights and primary buttons */
+  --sal-bronze: #d08a4e;
 }
 
 @theme inline {
-  --color-bg: var(--oche-bg);
-  --color-surface: var(--oche-surface);
-  --color-surface-2: var(--oche-surface-2);
-  --color-line: var(--oche-line);
-  --color-cream: var(--oche-cream);
-  --color-muted: var(--oche-muted);
-  --color-board-red: var(--oche-red);
-  --color-board-green: var(--oche-green);
-  --color-gold: var(--oche-gold);
-  --color-bronze: var(--oche-bronze);
+  --color-bg: var(--sal-bg);
+  --color-surface: var(--sal-surface);
+  --color-surface-2: var(--sal-surface-2);
+  --color-line: var(--sal-line);
+  --color-ink: var(--sal-ink);
+  --color-muted: var(--sal-muted);
+  --color-navy: var(--sal-navy);
+  --color-blue: var(--sal-blue);
+  --color-brand-red: var(--sal-red);
+  --color-alert: var(--sal-alert);
+  --color-win: var(--sal-green);
+  --color-gold: var(--sal-gold);
+  --color-bronze: var(--sal-bronze);
   --font-sans: var(--font-body);
-  --font-display: var(--font-condensed);
+  --font-display: var(--font-heading), var(--font-condensed);
 }
 
 html {
@@ -34,9 +43,24 @@ html {
 }
 
 body {
-  background: var(--oche-bg);
-  color: var(--oche-cream);
+  /* A faint navy glow at the top keeps large dark areas from looking flat. */
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgb(23 48 95 / 0.55), transparent 70%) no-repeat,
+    var(--sal-bg);
+  color: var(--sal-ink);
   font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Headings echo the crest's "SAL" lettering: heavy, condensed, slanted (font: --font-heading). */
+.font-display {
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* The crest's split: navy on the left, red on the right. */
+.brand-stripe {
+  background: linear-gradient(90deg, var(--sal-blue) 0 50%, var(--sal-red) 50% 100%);
 }
 
 /* Condensed numerals for scores and tables. */
@@ -46,7 +70,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--oche-gold);
+  outline: 2px solid var(--sal-gold);
   outline-offset: 2px;
 }
 

@@ -30,7 +30,7 @@ export function Segmented<T extends string>({
             aria-checked={value === o.value}
             onClick={() => onChange(o.value)}
             className={`min-h-11 flex-1 rounded-md px-3 text-sm font-medium ${
-              value === o.value ? "bg-surface-2 text-cream ring-1 ring-gold/60" : "text-muted hover:text-cream"
+              value === o.value ? "bg-surface-2 text-ink ring-1 ring-gold/60" : "text-muted hover:text-ink"
             }`}
           >
             {o.label}

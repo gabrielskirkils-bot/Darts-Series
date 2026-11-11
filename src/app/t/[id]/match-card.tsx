@@ -33,7 +33,7 @@ export function MatchCard({
 
   return (
     <div
-      className={`rounded-lg border bg-surface ${match.status === "live" ? "border-board-red/70" : "border-line"} ${
+      className={`rounded-lg border bg-surface ${match.status === "live" ? "border-brand-red/70" : "border-line"} ${
         compact ? "p-2" : "p-3"
       }`}
     >
@@ -42,7 +42,7 @@ export function MatchCard({
           {label && <span>{label}</span>}
           <span className="flex gap-2">
             {match.status === "live" && (
-              <span className="font-semibold text-board-red uppercase">
+              <span className="font-semibold text-alert uppercase">
                 ● {copy.tournament.lists.live}
                 {match.board !== null && ` · ${copy.tournament.onBoard(match.board)}`}
               </span>
@@ -98,12 +98,12 @@ function PlayerLine({
   winner: boolean;
 }) {
   return (
-    <div className={`flex min-h-8 items-center justify-between gap-3 ${winner ? "font-bold text-cream" : ""}`}>
+    <div className={`flex min-h-8 items-center justify-between gap-3 ${winner ? "font-bold text-ink" : ""}`}>
       <span className="truncate">
         {name}
         {winner && <span className="sr-only"> ({copy.tournament.winner})</span>}
       </span>
-      {showLegs && <span className={`num text-xl ${winner ? "text-board-green" : "text-muted"}`}>{legs}</span>}
+      {showLegs && <span className={`num text-xl ${winner ? "text-win" : "text-muted"}`}>{legs}</span>}
     </div>
   );
 }
@@ -156,8 +156,8 @@ function ResultForm({
                   onClick={() => setLegs(side === 0 ? [n, legs[1]] : [legs[0], n])}
                   className={`num min-h-11 min-w-11 rounded-md border text-lg font-bold ${
                     legs[side] === n
-                      ? "border-gold bg-gold/20 text-cream"
-                      : "border-line bg-surface-2 text-muted hover:text-cream"
+                      ? "border-gold bg-gold/20 text-ink"
+                      : "border-line bg-surface-2 text-muted hover:text-ink"
                   }`}
                 >
                   {n}

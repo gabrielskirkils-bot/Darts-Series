@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: copy.wizard.title };
 export default function NewTournamentPage() {
   return (
     <div className="space-y-5">
-      <Link href="/tournaments" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-cream">
+      <Link href="/tournaments" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink">
         ← {copy.tournament.back}
       </Link>
       <h1 className="font-display text-4xl font-bold tracking-wide uppercase">{copy.wizard.title}</h1>

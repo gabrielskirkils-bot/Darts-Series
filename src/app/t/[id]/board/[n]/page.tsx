@@ -60,7 +60,7 @@ async function BoardContent({ params }: { params: PageProps<"/t/[id]/board/[n]">
 
   const header = (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <Link href={`/t/${t.id}`} className="inline-flex min-h-11 items-center text-sm text-muted hover:text-cream">
+      <Link href={`/t/${t.id}`} className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink">
         ← {t.name}
       </Link>
       <nav aria-label={copy.board.switchLabel} className="flex flex-wrap gap-1">
@@ -70,7 +70,7 @@ async function BoardContent({ params }: { params: PageProps<"/t/[id]/board/[n]">
             href={`/t/${t.id}/board/${b}`}
             aria-current={b === board ? "page" : undefined}
             className={`flex min-h-11 items-center rounded-md px-3 text-sm font-semibold ${
-              b === board ? "bg-surface-2 text-cream ring-1 ring-gold/60" : "text-muted hover:text-cream"
+              b === board ? "bg-surface-2 text-ink ring-1 ring-gold/60" : "text-muted hover:text-ink"
             }`}
           >
             {copy.board.title(b)}

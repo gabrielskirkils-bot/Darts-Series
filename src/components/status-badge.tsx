@@ -3,7 +3,7 @@ import type { TournamentStatus } from "@/lib/domain/tournament";
 
 const tone: Record<TournamentStatus, string> = {
   groups: "border-gold/60 text-gold",
-  ko: "border-board-red/70 text-board-red",
+  ko: "border-brand-red/70 text-alert",
   done: "border-line text-muted",
 };
 

@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/players/[id]">): 
 export default function PlayerPage({ params, searchParams }: PageProps<"/players/[id]">) {
   return (
     <div className="space-y-5">
-      <Link href="/players" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-cream">
+      <Link href="/players" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink">
         ← {copy.players.back}
       </Link>
       <Suspense fallback={<p className="text-muted">{copy.common.loading}</p>}>
@@ -86,7 +86,7 @@ async function PlayerContent({
           extra={
             profile.eloChange !== null ? (
               <span
-                className={`num text-lg ${profile.eloChange >= 0 ? "text-board-green" : "text-board-red"}`}
+                className={`num text-lg ${profile.eloChange >= 0 ? "text-win" : "text-alert"}`}
                 title={copy.profile.eloChangeHint}
               >
                 {formatEloChange(profile.eloChange)}
@@ -268,7 +268,7 @@ function Recent({ profile, name }: { profile: PlayerProfile; name: (id: string) 
                 </div>
                 <span
                   className={`num shrink-0 rounded-md px-2 py-0.5 text-lg font-bold ${
-                    m.won ? "bg-board-green/20 text-board-green" : "bg-board-red/15 text-board-red"
+                    m.won ? "bg-win/20 text-win" : "bg-brand-red/15 text-alert"
                   }`}
                   aria-label={`${m.won ? copy.profile.won : copy.profile.lost} ${mine}–${theirs}`}
                 >

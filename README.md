@@ -1,6 +1,6 @@
-# Darts Series
+# SAL · Superamatieru Līga
 
-App for a darts tournament series: player profiles, tournaments with an automatically suggested
+App for the SAL darts league: player profiles, tournaments with an automatically suggested
 structure, a scoreboard at each board, a TV view for spectators, and a ranking (points + Elo).
 The full product spec is in [SPEC.md](SPEC.md); working rules for contributors are in [CLAUDE.md](CLAUDE.md).
 

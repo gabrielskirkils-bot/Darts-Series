@@ -70,32 +70,32 @@ export function LineChart({
       <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="img" aria-labelledby={`${id}-title`}>
         {niceTicks(yMin, yMax).map((t) => (
           <g key={t}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="var(--oche-line)" strokeWidth={1} />
-            <text x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end" fontSize={13} fill="var(--oche-muted)">
+            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="var(--sal-line)" strokeWidth={1} />
+            <text x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end" fontSize={13} fill="var(--sal-muted)">
               {format(t)}
             </text>
           </g>
         ))}
         {points.length > 0 && (
           <>
-            <text x={x(0)} y={H - 8} textAnchor="start" fontSize={13} fill="var(--oche-muted)">
+            <text x={x(0)} y={H - 8} textAnchor="start" fontSize={13} fill="var(--sal-muted)">
               {points[0]!.label}
             </text>
             {points.length > 1 && (
-              <text x={x(points.length - 1)} y={H - 8} textAnchor="end" fontSize={13} fill="var(--oche-muted)">
+              <text x={x(points.length - 1)} y={H - 8} textAnchor="end" fontSize={13} fill="var(--sal-muted)">
                 {points.at(-1)!.label}
               </text>
             )}
           </>
         )}
-        <path d={path} fill="none" stroke="var(--oche-gold)" strokeWidth={2} strokeLinejoin="round" />
+        <path d={path} fill="none" stroke="var(--sal-gold)" strokeWidth={2} strokeLinejoin="round" />
         {active !== null && (
           <line
             x1={x(active)}
             x2={x(active)}
             y1={PAD.top}
             y2={H - PAD.bottom}
-            stroke="var(--oche-muted)"
+            stroke="var(--sal-muted)"
             strokeWidth={1}
             strokeDasharray="3 3"
           />
@@ -106,8 +106,8 @@ export function LineChart({
               cx={x(i)}
               cy={y(p.value)}
               r={4}
-              fill="var(--oche-gold)"
-              stroke="var(--oche-surface)"
+              fill="var(--sal-gold)"
+              stroke="var(--sal-surface)"
               strokeWidth={2}
             />
             {/* Larger invisible hit target for hover, tap and keyboard focus. */}

@@ -190,7 +190,7 @@ Points table (add/remove rows), Elo match K, placing K and start rating, default
 - **Domain logic** in `src/lib/domain/` — pure TypeScript, no I/O: rules, checkout, structure suggestion, groups, bracket, standings, places, points, Elo, stats. All covered by **Vitest**.
 - Mutations from the client via Supabase JS (RLS protects). Multi-row operations (create tournament, generate knockout, finish, Elo recompute) run as Postgres functions (RPC) or Server Actions so they are atomic.
 - **Scoreboard:** optimistic local state; a visit = one `visits` insert; undo = delete the last row. Unique key `(match_id, leg_no, seq)` guards against double entry.
-- **Look:** dark "at the oche" visual language (dark green-black background, cream text, red/green accents like board segments), condensed numerals with `tabular-nums`. Mobile-first, large tap targets on the scoreboard (min 56px).
+- **Look:** the league's brand, **SAL · Superamatieru Līga** (crest in `Logo/`, cut out to `public/brand/sal-crest.png`). Dark navy UI from the crest's colours: navy background, white text, beer gold for highlights and primary buttons, the crest's red for live/danger (lighter red for text), green only for wins and checkouts; a navy/red split stripe under the header. Headings in heavy italic condensed type like the crest's "SAL"; condensed numerals with `tabular-nums`. The crest appears in the header, favicon/app icons, the ranking hero, the TV view and the login page. Mobile-first, large tap targets on the scoreboard (min 56px).
 
 ## 6. Routes
 | Route | What | Access |

@@ -25,7 +25,8 @@ export async function generateMetadata({ params }: PageProps<"/t/[id]/tv">): Pro
 /** Public TV screen (SPEC 4.13): full screen, no login, live via Realtime. */
 export default function TvPage({ params }: PageProps<"/t/[id]/tv">) {
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-bg text-cream">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-bg bg-[radial-gradient(120%_70%_at_50%_-20%,rgb(23_48_95/0.6),transparent_70%)] text-ink">
+      <div aria-hidden className="brand-stripe absolute inset-x-0 top-0 h-[0.5vh]" />
       <Suspense fallback={<p className="p-[2vw] text-[2vw] text-muted">{copy.common.loading}</p>}>
         <TvContent params={params} />
       </Suspense>

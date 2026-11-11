@@ -21,7 +21,7 @@ export function PeriodPicker({ basePath, years, period }: { basePath: string; ye
           scroll={false}
           aria-current={o.active ? "page" : undefined}
           className={`flex min-h-11 items-center rounded-md px-4 text-sm font-semibold ${
-            o.active ? "bg-surface-2 text-cream ring-1 ring-gold/60" : "text-muted hover:text-cream"
+            o.active ? "bg-surface-2 text-ink ring-1 ring-gold/60" : "text-muted hover:text-ink"
           }`}
         >
           {o.label}

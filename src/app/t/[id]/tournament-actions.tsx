@@ -144,7 +144,7 @@ export function TournamentActions({
 
       {confirming === "redraw" && <p className="text-sm text-muted">{copy.tournament.redrawHint}</p>}
       {confirming === "delete" && (
-        <p className="text-sm text-board-red" role="alert">
+        <p className="text-sm text-alert" role="alert">
           {finished ? copy.tournament.deleteFinishedWarning : copy.tournament.deleteWarning}
         </p>
       )}

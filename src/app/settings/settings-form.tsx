@@ -224,7 +224,7 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
         <label className="flex min-h-11 cursor-pointer items-center gap-3 sm:col-span-3">
           <input
             type="checkbox"
-            className="size-5 accent-board-green"
+            className="size-5 accent-gold"
             checked={askDoubles}
             onChange={(e) => setAskDoubles(e.target.checked)}
           />

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Crest } from "@/components/crest";
 import { PeriodPicker, periodFromParam } from "@/components/period-picker";
-import { alertError } from "@/components/ui";
+import { alertError, card } from "@/components/ui";
 import { copy, formatAverage, formatElo, formatEloChange } from "@/lib/copy";
 import type { Movement } from "@/lib/domain/points";
 import { rankingView, rankingYears, type RankingView } from "@/lib/domain/ranking";
@@ -11,11 +12,35 @@ import { formatDate } from "@/lib/time";
 export default function HomePage({ searchParams }: PageProps<"/">) {
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-4xl font-bold tracking-wide uppercase">{copy.home.title}</h1>
+      <Hero />
       <Suspense fallback={<p className="text-muted">{copy.home.loading}</p>}>
         <Ranking searchParams={searchParams} />
       </Suspense>
     </div>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-line bg-linear-to-br from-surface-2 via-surface to-bg p-5 shadow-xl shadow-black/30 sm:p-7">
+      <div aria-hidden className="brand-stripe absolute inset-x-0 top-0 h-1" />
+      {/* Large faint crest bleeding off the right edge, as a watermark. */}
+      <Crest
+        height={420}
+        sizeClass="h-[26rem] w-auto"
+        className="pointer-events-none absolute -top-16 -right-24 opacity-[0.06]"
+        decorative
+      />
+      <div className="relative flex items-center gap-4 sm:gap-6">
+        <Crest height={128} sizeClass="h-24 w-auto sm:h-32" priority />
+        <div className="min-w-0">
+          <p className="text-xs font-semibold tracking-[0.25em] text-gold uppercase sm:text-sm">{copy.leagueName}</p>
+          <h1 className="font-display mt-1 text-4xl leading-none tracking-wide uppercase sm:text-6xl">
+            {copy.home.title}
+          </h1>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -31,15 +56,15 @@ async function Ranking({ searchParams }: { searchParams: PageProps<"/">["searchP
   return (
     <div className="space-y-6">
       {data.inProgress && (
-        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-board-red/60 bg-board-red/10 p-4">
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-red/60 bg-brand-red/10 p-4">
           <p className="font-semibold">
-            <span className="mr-2 text-board-red" aria-hidden>
+            <span className="mr-2 text-alert" aria-hidden>
               ●
             </span>
             {copy.ranking.inProgress(data.inProgress.name)}
           </p>
           <div className="flex gap-2">
-            <Link href={`/t/${data.inProgress.id}`} className="rounded-lg bg-board-red px-4 py-2.5 font-semibold">
+            <Link href={`/t/${data.inProgress.id}`} className="rounded-lg bg-brand-red px-4 py-2.5 font-semibold">
               {copy.ranking.openTournament}
             </Link>
             <Link href={`/t/${data.inProgress.id}/tv`} className="rounded-lg border border-line px-4 py-2.5 font-semibold">
@@ -82,7 +107,7 @@ function Summary({ view, name }: { view: RankingView; name: (id: string) => stri
   return (
     <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {tiles.map((t) => (
-        <div key={t.label} className="rounded-lg border border-line bg-surface p-3 sm:p-4">
+        <div key={t.label} className="rounded-xl border border-line bg-surface p-3 shadow-lg shadow-black/20 sm:p-4">
           <dt className="text-sm text-muted">{t.label}</dt>
           <dd>
             <span className="num block text-3xl font-bold sm:text-4xl">{t.value}</span>
@@ -96,19 +121,22 @@ function Summary({ view, name }: { view: RankingView; name: (id: string) => stri
 
 function Podium({ view, name }: { view: RankingView; name: (id: string) => string }) {
   const last = view.last!;
-  const medal = ["text-gold", "text-cream", "text-bronze"];
+  const medal = ["text-gold", "text-ink", "text-bronze"];
   return (
-    <section aria-labelledby="podium-title" className="rounded-xl border border-line bg-surface p-4">
+    <section aria-labelledby="podium-title" className={card}>
       <h2 id="podium-title" className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
-        <Link href={`/t/${last.tournament.id}`} className="hover:text-cream">
+        <Link href={`/t/${last.tournament.id}`} className="hover:text-ink">
           {copy.ranking.podium(last.tournament.name)} · {formatDate(last.tournament.date)}
         </Link>
       </h2>
-      <ol className="grid gap-2 sm:grid-cols-3">
+      {/* A shared 3rd place makes four entries: give them a row of four instead of a stray one. */}
+      <ol className={`grid gap-2 ${last.podium.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
         {last.podium.map((r) => (
-          <li key={r.playerId} className="flex items-center gap-3 rounded-lg bg-surface-2 p-3">
-            <span className={`num text-3xl font-bold ${medal[r.place - 1] ?? ""}`}>{copy.ranking.place(r.place)}</span>
-            <Link href={`/players/${r.playerId}`} className="font-semibold hover:underline">
+          <li key={r.playerId} className="flex min-w-0 items-center gap-3 rounded-lg bg-surface-2 p-3">
+            <span className={`num w-12 shrink-0 text-3xl font-bold ${medal[r.place - 1] ?? ""}`}>
+              {copy.ranking.place(r.place)}
+            </span>
+            <Link href={`/players/${r.playerId}`} className="truncate font-semibold hover:underline">
               {name(r.playerId)}
             </Link>
           </li>
@@ -130,7 +158,7 @@ function MovementBadge({ movement }: { movement: Movement }) {
   const up = movement.kind === "up";
   return (
     <span
-      className={`num text-sm font-bold ${up ? "text-board-green" : "text-board-red"}`}
+      className={`num text-sm font-bold ${up ? "text-win" : "text-alert"}`}
       aria-label={up ? m.up(movement.by) : m.down(movement.by)}
     >
       {up ? "▲" : "▼"}
@@ -190,7 +218,7 @@ function RankingTable({ view, players }: { view: RankingView; players: Map<strin
                     {p?.nickname && <span className="text-sm text-muted">“{p.nickname}”</span>}
                   </Link>
                 </td>
-                <td className={`${td} font-bold text-cream`}>{r.points}</td>
+                <td className={`${td} font-bold text-ink`}>{r.points}</td>
                 <td className={`${td} hidden md:table-cell`}>{r.tournaments}</td>
                 <td className={`${td} hidden sm:table-cell`}>{r.wins}</td>
                 <td className={`${td} hidden md:table-cell`}>{copy.ranking.place(r.bestFinish)}</td>
@@ -200,7 +228,7 @@ function RankingTable({ view, players }: { view: RankingView; players: Map<strin
                 <td className={`${td} hidden whitespace-nowrap sm:table-cell`}>
                   {r.elo === null ? "–" : formatElo(r.elo)}
                   {r.eloChange !== null && (
-                    <span className={`ml-1 text-sm ${r.eloChange >= 0 ? "text-board-green" : "text-board-red"}`}>
+                    <span className={`ml-1 text-sm ${r.eloChange >= 0 ? "text-win" : "text-alert"}`}>
                       {formatEloChange(r.eloChange)}
                     </span>
                   )}
@@ -224,7 +252,7 @@ function Onboarding() {
           <li key={step.title} className="flex gap-3 rounded-lg bg-surface-2 p-4">
             <span
               className={`num flex size-9 shrink-0 items-center justify-center rounded-full text-xl font-bold ${
-                i % 2 === 0 ? "bg-board-red" : "bg-board-green"
+                i % 2 === 0 ? "bg-brand-red" : "bg-blue"
               }`}
             >
               {i + 1}

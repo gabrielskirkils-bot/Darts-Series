@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { signOut } from "@/app/auth/actions";
 import { copy } from "@/lib/copy";
 import { getViewer } from "@/lib/supabase/auth";
+import { Crest } from "./crest";
+import { NavLinks, NavLinksPlain, navLinkClass } from "./nav-links";
 
 const navItems = [
   { href: "/", label: copy.nav.ranking },
@@ -10,29 +12,30 @@ const navItems = [
   { href: "/tournaments", label: copy.nav.tournaments },
 ] as const;
 
-const navLink = "rounded-md px-2.5 py-2 text-muted hover:bg-surface-2 hover:text-cream sm:px-3";
-
 export function SiteHeader() {
   return (
-    <header className="border-b border-line bg-surface">
+    <header className="bg-surface/95 shadow-lg shadow-black/25">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
-        <Link href="/" className="font-display py-1 text-xl font-bold tracking-wide uppercase">
-          <span className="text-board-red" aria-hidden>
-            ●
-          </span>{" "}
-          {copy.appName}
+        <Link href="/" className="flex items-center gap-2.5 py-1" aria-label={copy.fullName}>
+          <Crest height={44} priority decorative />
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-2xl tracking-wide uppercase">{copy.appName}</span>
+            <span className="mt-0.5 text-[0.7rem] font-semibold tracking-[0.18em] text-muted uppercase">
+              {copy.leagueName}
+            </span>
+          </span>
         </Link>
         <nav className="-mx-2 flex flex-wrap items-center text-sm font-medium sm:mx-0">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={navLink}>
-              {item.label}
-            </Link>
-          ))}
+          {/* usePathname() is request data: stream it so pages can still prerender. */}
+          <Suspense fallback={<NavLinksPlain items={navItems} />}>
+            <NavLinks items={navItems} />
+          </Suspense>
           <Suspense fallback={null}>
             <AccountNav />
           </Suspense>
         </nav>
       </div>
+      <div className="brand-stripe h-1" aria-hidden />
     </header>
   );
 }
@@ -41,7 +44,7 @@ async function AccountNav() {
   const viewer = await getViewer();
   if (!viewer) {
     return (
-      <Link href="/login" className={navLink}>
+      <Link href="/login" className={navLinkClass}>
         {copy.nav.login}
       </Link>
     );
@@ -49,16 +52,16 @@ async function AccountNav() {
   return (
     <>
       {viewer.isOrganizer ? (
-        <Link href="/settings" className={navLink}>
+        <Link href="/settings" className={navLinkClass}>
           {copy.nav.settings}
         </Link>
       ) : (
-        <Link href="/login" className={`${navLink} text-gold`} title={copy.login.notOrganizer}>
+        <Link href="/login" className={`${navLinkClass} text-gold`} title={copy.login.notOrganizer}>
           {copy.nav.readOnly}
         </Link>
       )}
       <form action={signOut}>
-        <button type="submit" className={navLink}>
+        <button type="submit" className={navLinkClass}>
           {copy.nav.logout}
         </button>
       </form>

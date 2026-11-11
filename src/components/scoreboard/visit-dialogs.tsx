@@ -22,7 +22,7 @@ function Modal({ title, children, onCancel }: { title: string; children: ReactNo
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-14 w-full rounded-xl border border-line text-lg font-semibold text-muted hover:text-cream"
+          className="min-h-14 w-full rounded-xl border border-line text-lg font-semibold text-muted hover:text-ink"
         >
           {copy.scoring.cancel}
         </button>

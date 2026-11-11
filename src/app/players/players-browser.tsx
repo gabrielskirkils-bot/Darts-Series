@@ -49,7 +49,7 @@ export function PlayersBrowser({ players, canEdit }: { players: PlayerSummary[];
                 aria-pressed={sort === key}
                 onClick={() => setSort(key)}
                 className={`min-h-10 flex-1 rounded-md px-3 text-sm font-medium sm:flex-none ${
-                  sort === key ? "bg-surface-2 text-cream" : "text-muted hover:text-cream"
+                  sort === key ? "bg-surface-2 text-ink" : "text-muted hover:text-ink"
                 }`}
               >
                 {copy.players.sort[key]}
@@ -65,7 +65,7 @@ export function PlayersBrowser({ players, canEdit }: { players: PlayerSummary[];
           <label className="flex min-h-11 cursor-pointer items-center gap-2">
             <input
               type="checkbox"
-              className="size-5 accent-board-green"
+              className="size-5 accent-gold"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
             />

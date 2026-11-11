@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promis
 export default function TournamentPage({ params }: PageProps<"/t/[id]">) {
   return (
     <div className="space-y-5">
-      <Link href="/tournaments" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-cream">
+      <Link href="/tournaments" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink">
         ← {copy.tournament.back}
       </Link>
       <Suspense fallback={<p className="text-muted">{copy.common.loading}</p>}>
@@ -85,7 +85,7 @@ async function TournamentContent({ params }: { params: PageProps<"/t/[id]">["par
             aria-valuenow={done}
             className="h-2.5 overflow-hidden rounded-full bg-surface-2"
           >
-            <div className="h-full rounded-full bg-board-green" style={{ width: `${percent}%` }} />
+            <div className="h-full rounded-full bg-gold" style={{ width: `${percent}%` }} />
           </div>
         </div>
       </header>

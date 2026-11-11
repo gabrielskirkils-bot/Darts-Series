@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useMatchSync } from "@/components/scoreboard/use-match-sync";
+import { Crest } from "@/components/crest";
 import { StatusBadge } from "@/components/status-badge";
 import { copy, formatAverage, roundLabel } from "@/lib/copy";
 import { roundName } from "@/lib/domain/bracket";
@@ -89,14 +90,22 @@ export function TvScreen({
   return (
     <div className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-[1.2vh] p-[1.5vw]">
       <header className="flex items-center justify-between gap-[2vw]">
-        <div className="flex min-w-0 items-center gap-[1vw]">
-          <h1 className="font-display truncate text-[2.6vw] leading-none font-bold tracking-wide uppercase">{name}</h1>
-          <StatusBadge status={status} />
-          {winner && <span className="text-[1.6vw] font-semibold text-gold">{copy.tv.winner(names[winner] ?? "")}</span>}
+        <div className="flex min-w-0 items-center gap-[1.2vw]">
+          <Crest height={120} sizeClass="h-[8vh] w-auto" priority />
+          <div className="min-w-0">
+            <p className="text-[0.9vw] font-semibold tracking-[0.25em] text-gold uppercase">{copy.fullName}</p>
+            <div className="flex min-w-0 items-center gap-[1vw]">
+              <h1 className="font-display truncate text-[2.6vw] leading-none tracking-wide uppercase">{name}</h1>
+              <StatusBadge status={status} />
+              {winner && (
+                <span className="text-[1.6vw] font-semibold text-gold">{copy.tv.winner(names[winner] ?? "")}</span>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex w-[22vw] shrink-0 items-center gap-[0.8vw]">
           <div className="h-[0.8vh] flex-1 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-board-green" style={{ width: `${percent}%` }} />
+            <div className="h-full rounded-full bg-gold" style={{ width: `${percent}%` }} />
           </div>
           <span className="num text-[1.3vw] text-muted">
             {progress.done}/{progress.total}
@@ -207,22 +216,22 @@ function LiveBoard({ board, live, count }: { board: number; live: NonNullable<Tv
               key={side}
               className={`flex min-h-0 items-center gap-[1.2vw] rounded-[0.7vw] border-l-[0.5vw] px-[1vw] ${
                 active ? "border-gold bg-surface-2" : "border-transparent"
-              } ${state.winner === side ? "text-board-green" : ""}`}
+              } ${state.winner === side ? "text-win" : ""}`}
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[2vw] leading-tight font-semibold">{live.players[side]}</p>
                 <p className="text-[1.1vw] text-muted">
-                  {copy.tv.average} <span className="num text-cream">{formatAverage(summary[side].average)}</span>
+                  {copy.tv.average} <span className="num text-ink">{formatAverage(summary[side].average)}</span>
                   {mine && (
                     <>
                       {" · "}
                       {copy.tv.lastVisit}{" "}
-                      <span className={`num ${mine.bust ? "text-board-red" : "text-cream"}`}>
+                      <span className={`num ${mine.bust ? "text-alert" : "text-ink"}`}>
                         {mine.bust ? copy.scoring.bustEntry(mine.score) : mine.score}
                       </span>
                     </>
                   )}
-                  {route && <span className="num ml-[0.6vw] text-board-green">{route.join(" ")}</span>}
+                  {route && <span className="num ml-[0.6vw] text-win">{route.join(" ")}</span>}
                 </p>
               </div>
               <span className="num rounded-[0.5vw] bg-bg px-[0.8vw] text-[2.6vw] font-bold" aria-label={`${copy.tv.legs} ${state.legsWon[side]}`}>
@@ -241,12 +250,18 @@ function LiveBoard({ board, live, count }: { board: number; live: NonNullable<Tv
 
 function FreeBoard({ board, next }: { board: number; next: TvBoard["next"] }) {
   return (
-    <article className="flex min-h-0 flex-col justify-center rounded-[1vw] border border-dashed border-line p-[1vw]">
-      <p className="text-[1.2vw] font-semibold tracking-wide text-muted uppercase">
+    <article className="relative flex min-h-0 flex-col justify-center overflow-hidden rounded-[1vw] border border-dashed border-line p-[1vw]">
+      <Crest
+        height={300}
+        sizeClass="h-[130%] w-auto"
+        className="pointer-events-none absolute top-1/2 right-[3%] -translate-y-1/2 opacity-[0.08]"
+        decorative
+      />
+      <p className="relative text-[1.2vw] font-semibold tracking-wide text-muted uppercase">
         {copy.tv.board(board)} · {copy.tv.free}
       </p>
       {next && (
-        <p className="mt-[0.6vh] truncate text-[2vw]">
+        <p className="relative mt-[0.6vh] truncate text-[2vw]">
           <span className="text-muted">{copy.tv.next}: </span>
           <span className="font-semibold">{next.players[0]}</span>
           <span className="text-muted"> {copy.tv.versus} </span>
@@ -293,8 +308,8 @@ function GroupsSlide({
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.playerId} className={r.position <= qualifiers ? "text-cream" : "text-muted"}>
-                  <td className={`num ${r.position <= qualifiers ? "text-board-green" : ""}`}>{r.position}</td>
+                <tr key={r.playerId} className={r.position <= qualifiers ? "text-ink" : "text-muted"}>
+                  <td className={`num ${r.position <= qualifiers ? "text-win" : ""}`}>{r.position}</td>
                   <td className="truncate">{names[r.playerId]}</td>
                   <td className="num text-right">{r.wins}</td>
                   <td className="num text-right">{r.legDiff > 0 ? `+${r.legDiff}` : r.legDiff}</td>

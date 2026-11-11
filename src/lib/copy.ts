@@ -14,8 +14,12 @@ import type { Format, MatchFormats, StageFormat, StructureError } from "@/lib/do
 import type { TournamentInputError, TournamentStatus } from "@/lib/domain/tournament";
 
 export const copy = {
-  appName: "Darts Series",
-  tagline: "Ranking, tournaments and live scores",
+  appName: "SAL",
+  /** The league's own name (a proper noun, so it stays in Latvian). */
+  leagueName: "Superamatieru Līga",
+  fullName: "SAL · Superamatieru Līga",
+  tagline: "Darts league: ranking, tournaments and live scores",
+  crestAlt: "SAL Superamatieru Līga crest",
 
   nav: {
     ranking: "Ranking",
@@ -86,7 +90,7 @@ export const copy = {
   home: {
     title: "Ranking",
     emptyTitle: "No tournaments yet",
-    emptyIntro: "Get the series going in three steps:",
+    emptyIntro: "Get the league going in three steps:",
     steps: [
       { title: "Add players", body: "Create a profile for everyone who plays." },
       { title: "Create a tournament", body: "Pick the entrants; the structure is suggested for you." },
