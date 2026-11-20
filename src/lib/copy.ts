@@ -106,12 +106,18 @@ export const copy = {
 
   login: {
     title: "Organizer login",
-    intro: "Spectators don't need an account. Organizers log in with a link sent by email.",
+    intro: "Spectators don't need an account. Organizers log in with a link or code sent by email.",
     emailLabel: "Email",
     submit: "Send login link",
     sending: "Sending…",
     sentTitle: "Check your email",
-    sentBody: (email: string) => `We sent a login link to ${email}. Open it on this device.`,
+    sentBody: (email: string) =>
+      `We sent a login email to ${email}. Enter the code from it below, or open its link in this browser.`,
+    codeLabel: "Code from the email",
+    codeSubmit: "Log in",
+    verifying: "Checking…",
+    codeInvalid: "That code is wrong or has expired. Check it, or request a new email.",
+    codeFormat: "Enter the code from the email (6 to 8 digits).",
     useAnother: "Use a different email",
     invalidEmail: "Enter a valid email address.",
     rateLimited: "Too many login emails. Wait a few minutes and try again.",
